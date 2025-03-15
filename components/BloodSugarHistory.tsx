@@ -10,9 +10,13 @@ interface BloodSugarData {
 
 interface BloodSugarHistoryProps {
   data: BloodSugarData;
+  onOpenModal?: () => void;
 }
 
-const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
+const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({
+  data,
+  onOpenModal,
+}) => {
   return (
     <div className="p-4 sm:p-5 md:p-6 pt-0 sm:pt-1">
       <div className="flex justify-between mb-4">
@@ -34,7 +38,10 @@ const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
         </div>
       </div>
 
-      <button className="w-full bg-black text-white py-3 sm:py-4 md:py-5 rounded-lg flex items-center justify-center font-medium text-base sm:text-lg md:text-xl transition-all duration-300 hover:bg-gray-800 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black">
+      <button
+        onClick={onOpenModal}
+        className="w-full bg-black text-white py-3 sm:py-4 md:py-5 rounded-lg flex items-center justify-center font-medium text-base sm:text-lg md:text-xl transition-all duration-300 hover:bg-gray-800 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-5 w-5 sm:h-6 sm:w-6 mr-2"

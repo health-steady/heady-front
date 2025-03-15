@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
+import BloodSugarInputModal, {
+  BloodSugarInputData,
+} from "@/components/BloodSugarInputModal";
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState("2025년 1월 11일");
@@ -26,6 +29,38 @@ export default function Calendar() {
       icon: "🍱",
     },
   ]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSubmitBloodSugar = (data: BloodSugarInputData) => {
+    console.log("혈당 데이터 제출:", data);
+    // 여기서 데이터를 처리하고 상태를 업데이트할 수 있습니다.
+    // 예: API 호출 또는 상태 업데이트
+
+    // 새 기록 추가 예시
+    const newRecord = {
+      id: bloodSugarRecords.length + 1,
+      time: `${data.time.period} ${data.time.hour}`,
+      value: parseInt(data.bloodSugar),
+      type: data.mealTime.split(" ")[0], // "아침 식전" -> "아침"
+      meal: data.food || "기록 없음",
+      icon: data.mealTime.includes("아침")
+        ? "🌞"
+        : data.mealTime.includes("점심")
+        ? "🍱"
+        : "🌙",
+    };
+
+    setBloodSugarRecords([...bloodSugarRecords, newRecord]);
+  };
 
   // 2025년 1월 달력 데이터 생성
   const days = ["일", "월", "화", "수", "목", "금", "토"];
@@ -218,7 +253,10 @@ export default function Calendar() {
 
             {/* 혈당 기록 추가 버튼 */}
             <div className="p-4">
-              <button className="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors">
+              <button
+                onClick={handleOpenModal}
+                className="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 transition-colors"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5 mr-2"
@@ -239,6 +277,13 @@ export default function Calendar() {
           </div>
         </div>
         <BottomNavigation activePage="calendar" />
+
+        {/* 혈당 입력 모달 */}
+        <BloodSugarInputModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmitBloodSugar}
+        />
       </div>
     </div>
   );
