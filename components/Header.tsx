@@ -3,13 +3,17 @@ import Image from "next/image";
 
 interface HeaderProps {
   userName: string;
+  onProfileClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ userName }) => {
+const Header: React.FC<HeaderProps> = ({ userName, onProfileClick }) => {
   return (
     <div className="flex justify-between items-center p-3 pt-0 sm:p-4 sm:pt-2 md:p-5 md:pt-2 border-b border-gray-100">
       <div className="flex items-center">
-        <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-gray-200 mr-3 sm:mr-4 md:mr-5 overflow-hidden transition-all duration-300 hover:shadow-md">
+        <div
+          className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-gray-200 mr-3 sm:mr-4 md:mr-5 overflow-hidden transition-all duration-300 hover:shadow-md cursor-pointer"
+          onClick={onProfileClick}
+        >
           {/* 프로필 이미지 */}
           <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-600 text-base sm:text-lg md:text-xl">
             {userName.charAt(0)}
