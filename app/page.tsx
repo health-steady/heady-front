@@ -35,7 +35,7 @@ export default function Home() {
             <NutritionSummary data={nutritionData} />
           </div>
         </div>
-        <BottomNavigation />
+        <BottomNavigation activePage="home" />
       </div>
     </div>
   );

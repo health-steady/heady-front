@@ -1,9 +1,21 @@
 import React from "react";
+import Link from "next/link";
 
-const BottomNavigation: React.FC = () => {
+interface BottomNavigationProps {
+  activePage?: string;
+}
+
+const BottomNavigation: React.FC<BottomNavigationProps> = ({
+  activePage = "home",
+}) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-50 w-full max-w-[500px] mx-auto shadow-lg">
-      <div className="flex flex-col items-center justify-center text-sm text-black">
+      <Link
+        href="/"
+        className={`flex flex-col items-center justify-center text-sm ${
+          activePage === "home" ? "text-black" : "text-gray-500"
+        }`}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6 sm:h-7 sm:w-7"
@@ -19,8 +31,13 @@ const BottomNavigation: React.FC = () => {
           />
         </svg>
         <span className="mt-1">홈</span>
-      </div>
-      <div className="flex flex-col items-center justify-center text-sm text-gray-500">
+      </Link>
+      <Link
+        href="/stats"
+        className={`flex flex-col items-center justify-center text-sm ${
+          activePage === "stats" ? "text-black" : "text-gray-500"
+        }`}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6 sm:h-7 sm:w-7"
@@ -36,8 +53,13 @@ const BottomNavigation: React.FC = () => {
           />
         </svg>
         <span className="mt-1">통계</span>
-      </div>
-      <div className="flex flex-col items-center justify-center text-sm text-gray-500">
+      </Link>
+      <Link
+        href="/calendar"
+        className={`flex flex-col items-center justify-center text-sm ${
+          activePage === "calendar" ? "text-black" : "text-gray-500"
+        }`}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6 sm:h-7 sm:w-7"
@@ -53,8 +75,13 @@ const BottomNavigation: React.FC = () => {
           />
         </svg>
         <span className="mt-1">기록</span>
-      </div>
-      <div className="flex flex-col items-center justify-center text-sm text-gray-500">
+      </Link>
+      <Link
+        href="/profile"
+        className={`flex flex-col items-center justify-center text-sm ${
+          activePage === "profile" ? "text-black" : "text-gray-500"
+        }`}
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-6 sm:h-7 sm:w-7"
@@ -70,7 +97,7 @@ const BottomNavigation: React.FC = () => {
           />
         </svg>
         <span className="mt-1">내정보</span>
-      </div>
+      </Link>
     </div>
   );
 };
