@@ -46,4 +46,22 @@ next-env.d.ts
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db 
+Thumbs.db
+
+# 추가 항목
+# 캐시 파일
+.cache/
+.eslintcache
+
+# 로컬 로그 파일
+logs
+*.log
+
+# 서비스 워커
+public/sw.js
+public/workbox-*.js
+
+# 정적 빌드 관련
+.netlify/
+.firebase/
+firebase-debug.log 
