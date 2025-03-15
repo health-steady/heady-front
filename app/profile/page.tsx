@@ -17,7 +17,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-0">
-      <div className="w-full max-w-[500px] h-screen sm:h-[915px] relative bg-white overflow-hidden shadow-xl border-2 border-gray-300">
+      <div className="w-full max-w-[500px] h-screen sm:h-[915px] relative bg-white overflow-hidden shadow-xl border border-gray-300">
         <div className="h-full overflow-y-auto pb-28 pt-0">
           <div className="bg-white h-full">
             {/* 헤더 */}

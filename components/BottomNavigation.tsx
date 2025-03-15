@@ -9,16 +9,16 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activePage = "home",
 }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-50 w-full max-w-[500px] mx-auto shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border border-gray-300 flex justify-around py-3 z-50 w-full max-w-[500px] mx-auto shadow-lg">
       <Link
         href="/"
-        className={`flex flex-col items-center justify-center text-sm ${
-          activePage === "home" ? "text-black" : "text-gray-500"
+        className={`flex flex-col items-center justify-center text-sm transition-all duration-200 transform hover:scale-110 active:scale-95 hover:text-blue-500 ${
+          activePage === "home" ? "text-blue-500 font-medium" : "text-gray-500"
         }`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 sm:h-7 sm:w-7"
+          className="h-6 w-6 sm:h-7 sm:w-7 transition-colors duration-200"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -34,13 +34,13 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
       </Link>
       <Link
         href="/stats"
-        className={`flex flex-col items-center justify-center text-sm ${
-          activePage === "stats" ? "text-black" : "text-gray-500"
+        className={`flex flex-col items-center justify-center text-sm transition-all duration-200 transform hover:scale-110 active:scale-95 hover:text-blue-500 ${
+          activePage === "stats" ? "text-blue-500 font-medium" : "text-gray-500"
         }`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 sm:h-7 sm:w-7"
+          className="h-6 w-6 sm:h-7 sm:w-7 transition-colors duration-200"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -56,13 +56,15 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
       </Link>
       <Link
         href="/calendar"
-        className={`flex flex-col items-center justify-center text-sm ${
-          activePage === "calendar" ? "text-black" : "text-gray-500"
+        className={`flex flex-col items-center justify-center text-sm transition-all duration-200 transform hover:scale-110 active:scale-95 hover:text-blue-500 ${
+          activePage === "calendar"
+            ? "text-blue-500 font-medium"
+            : "text-gray-500"
         }`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 sm:h-7 sm:w-7"
+          className="h-6 w-6 sm:h-7 sm:w-7 transition-colors duration-200"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -78,13 +80,15 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
       </Link>
       <Link
         href="/profile"
-        className={`flex flex-col items-center justify-center text-sm ${
-          activePage === "profile" ? "text-black" : "text-gray-500"
+        className={`flex flex-col items-center justify-center text-sm transition-all duration-200 transform hover:scale-110 active:scale-95 hover:text-blue-500 ${
+          activePage === "profile"
+            ? "text-blue-500 font-medium"
+            : "text-gray-500"
         }`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 sm:h-7 sm:w-7"
+          className="h-6 w-6 sm:h-7 sm:w-7 transition-colors duration-200"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
