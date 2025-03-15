@@ -6,12 +6,14 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLogin: (email: string, password: string) => void;
+  onSignupClick: () => void;
 }
 
 const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
   onLogin,
+  onSignupClick,
 }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -104,7 +106,14 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 비밀번호 찾기
               </a>
               <span className="mx-2">|</span>
-              <a href="#" className="hover:underline">
+              <a
+                href="#"
+                className="hover:underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onSignupClick();
+                }}
+              >
                 회원가입
               </a>
             </div>

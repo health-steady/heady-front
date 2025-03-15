@@ -10,6 +10,7 @@ import BloodSugarInputModal, {
   BloodSugarInputData,
 } from "@/components/BloodSugarInputModal";
 import LoginModal from "@/components/LoginModal";
+import SignupModal, { SignupData } from "@/components/SignupModal";
 
 export default function Home() {
   const [userName, setUserName] = useState("김민수");
@@ -29,6 +30,7 @@ export default function Home() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
 
   const handleOpenModal = () => {
     console.log("모달 열기 버튼 클릭됨");
@@ -48,11 +50,31 @@ export default function Home() {
     setIsLoginModalOpen(false);
   };
 
+  const handleOpenSignupModal = () => {
+    console.log("회원가입 버튼 클릭됨");
+    setIsLoginModalOpen(false); // 로그인 모달 닫기
+    setIsSignupModalOpen(true); // 회원가입 모달 열기
+  };
+
+  const handleCloseSignupModal = () => {
+    setIsSignupModalOpen(false);
+  };
+
   const handleLogin = (email: string, password: string) => {
     console.log("로그인 시도:", email, password);
     // 여기서 로그인 로직을 구현할 수 있습니다.
     // 예: API 호출 또는 상태 업데이트
     handleCloseLoginModal();
+  };
+
+  const handleSignupSubmit = (data: SignupData) => {
+    console.log("회원가입 데이터:", data);
+    // 여기서 회원가입 로직을 구현할 수 있습니다.
+    // 예: API 호출 또는 상태 업데이트
+    console.log("사용자 정보:", data.step1);
+    console.log("연락처 정보:", data.step2);
+    console.log("계정 정보:", data.step3);
+    handleCloseSignupModal();
   };
 
   const handleSubmitBloodSugar = (data: BloodSugarInputData) => {
@@ -91,6 +113,14 @@ export default function Home() {
         isOpen={isLoginModalOpen}
         onClose={handleCloseLoginModal}
         onLogin={handleLogin}
+        onSignupClick={handleOpenSignupModal}
+      />
+
+      {/* 회원가입 모달 */}
+      <SignupModal
+        isOpen={isSignupModalOpen}
+        onClose={handleCloseSignupModal}
+        onNext={handleSignupSubmit}
       />
     </div>
   );
