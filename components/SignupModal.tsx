@@ -307,12 +307,21 @@ const SignupModal: React.FC<SignupModalProps> = ({
         </div>
       </div>
 
-      <button
-        type="submit"
-        className="w-full py-3 bg-black text-white rounded-lg font-medium"
-      >
-        다음
-      </button>
+      <div className="flex space-x-4">
+        <button
+          type="button"
+          onClick={goBack}
+          className="flex-1 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300"
+        >
+          이전
+        </button>
+        <button
+          type="submit"
+          className="flex-1 py-3 bg-black text-white rounded-lg font-medium"
+        >
+          다음
+        </button>
+      </div>
     </form>
   );
 
@@ -368,12 +377,21 @@ const SignupModal: React.FC<SignupModalProps> = ({
         )}
       </div>
 
-      <button
-        type="submit"
-        className="w-full py-3 bg-black text-white rounded-lg font-medium"
-      >
-        가입하기
-      </button>
+      <div className="flex space-x-4">
+        <button
+          type="button"
+          onClick={goBack}
+          className="flex-1 py-3 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300"
+        >
+          이전
+        </button>
+        <button
+          type="submit"
+          className="flex-1 py-3 bg-black text-white rounded-lg font-medium"
+        >
+          가입하기
+        </button>
+      </div>
     </form>
   );
 
