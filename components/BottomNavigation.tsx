@@ -9,7 +9,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activePage = "home",
 }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border border-gray-300 flex justify-around py-3 z-50 w-full max-w-[500px] mx-auto shadow-lg">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3 z-50 w-full max-w-[500px] mx-auto">
       <Link
         href="/"
         className={`flex flex-col items-center justify-center text-sm transition-all duration-200 transform hover:scale-110 active:scale-95 hover:text-blue-500 ${

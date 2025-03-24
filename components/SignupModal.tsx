@@ -26,7 +26,6 @@ export interface SignupStep2Data {
 }
 
 export interface SignupStep3Data {
-  userId: string;
   password: string;
   passwordConfirm: string;
 }
@@ -61,7 +60,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
       },
     },
     step3: {
-      userId: "",
       password: "",
       passwordConfirm: "",
     },
@@ -247,7 +245,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
     <form onSubmit={handleStep2Submit}>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          휴대전화
+          휴대전화 (선택)
         </label>
         <div className="flex items-center">
           <input
@@ -257,7 +255,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
             value={formData.step2.phone.first}
             onChange={handleStep2PhoneChange}
             className="w-1/3 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
           />
           <span className="mx-2">-</span>
           <input
@@ -267,7 +264,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
             value={formData.step2.phone.middle}
             onChange={handleStep2PhoneChange}
             className="w-1/3 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
           />
           <span className="mx-2">-</span>
           <input
@@ -277,14 +273,13 @@ const SignupModal: React.FC<SignupModalProps> = ({
             value={formData.step2.phone.last}
             onChange={handleStep2PhoneChange}
             className="w-1/3 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-            required
           />
         </div>
       </div>
 
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          이메일 (선택)
+          이메일
         </label>
         <div className="flex items-center">
           <input
@@ -294,6 +289,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
             value={formData.step2.email.id}
             onChange={handleStep2EmailChange}
             className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
           />
           <span className="mx-2">@</span>
           <input
@@ -303,6 +299,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
             value={formData.step2.email.domain}
             onChange={handleStep2EmailChange}
             className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
           />
         </div>
       </div>
@@ -327,21 +324,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
 
   const renderStep3 = () => (
     <form onSubmit={handleStep3Submit}>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          아이디
-        </label>
-        <input
-          type="text"
-          name="userId"
-          placeholder="아이디를 입력해주세요"
-          value={formData.step3.userId}
-          onChange={handleStep3Change}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          required
-        />
-      </div>
-
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           비밀번호
