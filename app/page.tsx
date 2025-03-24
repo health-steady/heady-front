@@ -113,11 +113,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-0">
       <div className="w-full max-w-[500px] h-screen sm:h-[915px] relative bg-white overflow-hidden shadow-xl border border-gray-200">
-        <div className="fixed top-0 left-0 right-0 max-w-[500px] mx-auto bg-white z-10 border-b border-gray-200">
+        <div className="fixed top-0 left-0 right-0 max-w-[500px] mx-auto bg-white z-10">
           <Header userName={userName} onProfileClick={handleOpenLoginModal} />
         </div>
-        <div className="h-full overflow-y-auto pt-[60px]">
+        <div className="h-full overflow-y-auto pt-[85px]">
           <div className="bg-white h-full">
+            <div className="h-3 sm:h-4 md:h-5 bg-gray-100"></div>
             <BloodSugarSummary data={bloodSugarData} />
             <BloodSugarHistory data={bloodSugarData} />
             <div className="h-2 bg-gray-100"></div>
@@ -127,11 +128,11 @@ export default function Home() {
               {/* 혈당 기록하기 버튼 */}
               <button
                 onClick={handleOpenBloodSugarModal}
-                className="w-full py-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors"
+                className="w-full py-2.5 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center text-blue-600 hover:bg-blue-100 transition-colors text-sm"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
+                  className="h-4 w-4 mr-2"
                   viewBox="0 0 24 24"
                   fill="#e74c3c"
                 >
@@ -143,9 +144,9 @@ export default function Home() {
               {/* 식사 기록하기 버튼 */}
               <button
                 onClick={handleOpenMealModal}
-                className="w-full py-3 bg-green-50 border border-green-100 rounded-lg flex items-center justify-center text-green-600 hover:bg-green-100 transition-colors"
+                className="w-full py-2.5 bg-green-50 border border-green-100 rounded-lg flex items-center justify-center text-green-600 hover:bg-green-100 transition-colors text-sm"
               >
-                <span className="text-xl mr-2">🍱</span>
+                <span className="text-base mr-2">🍱</span>
                 식사 기록하기
               </button>
             </div>

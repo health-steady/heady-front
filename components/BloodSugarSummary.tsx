@@ -18,9 +18,9 @@ const BloodSugarSummary: React.FC<BloodSugarSummaryProps> = ({ data }) => {
       <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-3">
         {/* 아침 혈당 */}
         <div className="bg-green-50 p-3 sm:p-4 md:p-5 rounded-lg transition-all duration-300 hover:shadow-md">
-          <div className="text-sm sm:text-base text-green-600 mb-1 flex items-center">
+          <div className="text-xs sm:text-sm text-green-600 mb-1 flex items-center">
             <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 mr-1 text-green-600"
+              className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-green-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -35,17 +35,17 @@ const BloodSugarSummary: React.FC<BloodSugarSummaryProps> = ({ data }) => {
             </svg>
             아침
           </div>
-          <div className="text-xl sm:text-2xl md:text-3xl font-bold">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold">
             {data.morning}
           </div>
-          <div className="text-sm sm:text-base text-gray-500">mg/dL</div>
+          <div className="text-xs sm:text-sm text-gray-500">mg/dL</div>
         </div>
 
         {/* 점심 혈당 */}
         <div className="bg-yellow-50 p-3 sm:p-4 md:p-5 rounded-lg transition-all duration-300 hover:shadow-md">
-          <div className="text-sm sm:text-base text-yellow-600 mb-1 flex items-center">
+          <div className="text-xs sm:text-sm text-yellow-600 mb-1 flex items-center">
             <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 mr-1 text-yellow-600"
+              className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-yellow-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -60,17 +60,17 @@ const BloodSugarSummary: React.FC<BloodSugarSummaryProps> = ({ data }) => {
             </svg>
             점심
           </div>
-          <div className="text-xl sm:text-2xl md:text-3xl font-bold">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold">
             {data.afternoon}
           </div>
-          <div className="text-sm sm:text-base text-gray-500">mg/dL</div>
+          <div className="text-xs sm:text-sm text-gray-500">mg/dL</div>
         </div>
 
         {/* 저녁 혈당 */}
         <div className="bg-blue-50 p-3 sm:p-4 md:p-5 rounded-lg transition-all duration-300 hover:shadow-md">
-          <div className="text-sm sm:text-base text-blue-600 mb-1 flex items-center">
+          <div className="text-xs sm:text-sm text-blue-600 mb-1 flex items-center">
             <svg
-              className="w-4 h-4 sm:w-5 sm:h-5 mr-1 text-blue-600"
+              className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-blue-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -85,10 +85,10 @@ const BloodSugarSummary: React.FC<BloodSugarSummaryProps> = ({ data }) => {
             </svg>
             저녁
           </div>
-          <div className="text-xl sm:text-2xl md:text-3xl font-bold">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold">
             {data.evening ? data.evening : "--"}
           </div>
-          <div className="text-sm sm:text-base text-gray-500">mg/dL</div>
+          <div className="text-xs sm:text-sm text-gray-500">mg/dL</div>
         </div>
       </div>
     </div>

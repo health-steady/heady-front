@@ -17,18 +17,18 @@ const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
     <div className="p-4 sm:p-5 md:p-6 pt-0 sm:pt-1">
       <div className="flex justify-between mb-4">
         <div className="transition-all duration-300 hover:scale-105">
-          <div className="text-sm sm:text-base md:text-lg text-gray-500">
+          <div className="text-xs sm:text-sm md:text-base text-gray-500">
             목표 혈당
           </div>
-          <div className="text-xl sm:text-2xl md:text-3xl font-bold">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold">
             {data.target} mg/dL
           </div>
         </div>
         <div className="transition-all duration-300 hover:scale-105">
-          <div className="text-sm sm:text-base md:text-lg text-gray-500">
+          <div className="text-xs sm:text-sm md:text-base text-gray-500">
             현재 혈당
           </div>
-          <div className="text-xl sm:text-2xl md:text-3xl font-bold">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold">
             {data.current} mg/dL
           </div>
         </div>

@@ -124,9 +124,9 @@ export default function Calendar() {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-0">
       <div className="w-full max-w-[500px] h-screen sm:h-[915px] relative bg-white overflow-hidden shadow-xl border border-gray-200">
-        <div className="fixed top-0 left-0 right-0 max-w-[500px] mx-auto bg-white z-10 border-b border-gray-200">
+        <div className="fixed top-0 left-0 right-0 max-w-[500px] mx-auto bg-white z-10">
           {/* 헤더 */}
-          <div className="flex justify-between items-center p-3 pt-0 sm:p-4 sm:pt-2 md:p-5 md:pt-2">
+          <div className="flex justify-between items-center p-3 py-4 sm:p-4 sm:py-5 md:p-5 md:py-6 border-b border-gray-200">
             <div className="flex items-center">
               <h1 className="font-bold text-lg sm:text-xl md:text-2xl">
                 혈당 기록
@@ -156,8 +156,9 @@ export default function Calendar() {
             </div>
           </div>
         </div>
-        <div className="h-full overflow-y-auto pt-[60px]">
+        <div className="h-full overflow-y-auto pt-[85px]">
           <div className="bg-white h-full">
+            <div className="h-3 sm:h-4 md:h-5 bg-gray-100"></div>
             {/* 검색 바 */}
             <div className="p-4">
               <div className="relative">

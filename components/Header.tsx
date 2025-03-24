@@ -8,7 +8,7 @@ interface HeaderProps {
 
 export default function Header({ userName, onProfileClick }: HeaderProps) {
   return (
-    <div className="flex justify-between items-center p-3 pt-0 sm:p-4 sm:pt-2 md:p-5 md:pt-2 border-b border-gray-200">
+    <div className="flex justify-between items-center p-3 py-4 sm:p-4 sm:py-5 md:p-5 md:py-6 border-b border-gray-200">
       <div className="flex items-center">
         <div
           className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-blue-100 overflow-hidden mr-3 flex-shrink-0 border-2 border-blue-300 cursor-pointer transition-all duration-300 hover:scale-105 hover:border-blue-400"
@@ -25,10 +25,10 @@ export default function Header({ userName, onProfileClick }: HeaderProps) {
           />
         </div>
         <div>
-          <h1 className="font-bold text-lg sm:text-xl md:text-2xl">
+          <h1 className="font-bold text-base sm:text-lg md:text-xl">
             혈당 관리
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-xs sm:text-sm text-gray-500">
             {userName ? `${userName}님 환영합니다` : "로그인하세요"}
           </p>
         </div>
