@@ -19,7 +19,6 @@ export interface BloodSugarInputData {
     period: string;
   };
   mealTime: string;
-  food: string;
   bloodSugar: string;
 }
 
@@ -40,9 +39,25 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
       period: "오전",
     },
     mealTime: "",
-    food: "",
     bloodSugar: "",
   });
+
+  const [mealPeriod, setMealPeriod] = useState<string>("");
+  const [mealType, setMealType] = useState<string>("");
+
+  useEffect(() => {
+    if (mealType && mealPeriod) {
+      setFormData({
+        ...formData,
+        mealTime: `${mealType} ${mealPeriod}`,
+      });
+    } else if (mealType && ["임의", "취침 전"].includes(mealType)) {
+      setFormData({
+        ...formData,
+        mealTime: mealType,
+      });
+    }
+  }, [mealType, mealPeriod]);
 
   const [isMounted, setIsMounted] = useState(false);
 
@@ -75,6 +90,14 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
         ...formData,
         [section]: value,
       });
+    }
+  };
+
+  const handleMealTypeChange = (type: string) => {
+    setMealType(type);
+    // 임의나 취침 전을 선택하면 mealPeriod를 초기화
+    if (type === "임의" || type === "취침 전") {
+      setMealPeriod("");
     }
   };
 
@@ -201,120 +224,150 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               시간대 선택
             </label>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="flex items-center border border-gray-300 rounded-md p-3">
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <label
+                className={`flex items-center border rounded-md p-3 ${
+                  mealType === "아침"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+              >
                 <input
                   type="radio"
-                  name="mealTime"
-                  value="아침 식전"
-                  checked={formData.mealTime === "아침 식전"}
-                  onChange={(e) => handleChange("mealTime", "", e.target.value)}
+                  name="mealType"
+                  value="아침"
+                  checked={mealType === "아침"}
+                  onChange={(e) => handleMealTypeChange(e.target.value)}
                   className="mr-2"
                 />
-                아침 식전
+                아침
               </label>
-              <label className="flex items-center border border-gray-300 rounded-md p-3">
+              <label
+                className={`flex items-center border rounded-md p-3 ${
+                  mealType === "점심"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+              >
                 <input
                   type="radio"
-                  name="mealTime"
-                  value="아침 식후"
-                  checked={formData.mealTime === "아침 식후"}
-                  onChange={(e) => handleChange("mealTime", "", e.target.value)}
+                  name="mealType"
+                  value="점심"
+                  checked={mealType === "점심"}
+                  onChange={(e) => handleMealTypeChange(e.target.value)}
                   className="mr-2"
                 />
-                아침 식후
+                점심
               </label>
-              <label className="flex items-center border border-gray-300 rounded-md p-3">
+              <label
+                className={`flex items-center border rounded-md p-3 ${
+                  mealType === "저녁"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+              >
                 <input
                   type="radio"
-                  name="mealTime"
-                  value="점심 식전"
-                  checked={formData.mealTime === "점심 식전"}
-                  onChange={(e) => handleChange("mealTime", "", e.target.value)}
+                  name="mealType"
+                  value="저녁"
+                  checked={mealType === "저녁"}
+                  onChange={(e) => handleMealTypeChange(e.target.value)}
                   className="mr-2"
                 />
-                점심 식전
+                저녁
               </label>
-              <label className="flex items-center border border-gray-300 rounded-md p-3">
+              <label
+                className={`flex items-center border rounded-md p-3 ${
+                  mealType === "간식"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+              >
                 <input
                   type="radio"
-                  name="mealTime"
-                  value="점심 식후"
-                  checked={formData.mealTime === "점심 식후"}
-                  onChange={(e) => handleChange("mealTime", "", e.target.value)}
+                  name="mealType"
+                  value="간식"
+                  checked={mealType === "간식"}
+                  onChange={(e) => handleMealTypeChange(e.target.value)}
                   className="mr-2"
                 />
-                점심 식후
+                간식
               </label>
-              <label className="flex items-center border border-gray-300 rounded-md p-3">
+              <label
+                className={`flex items-center border rounded-md p-3 ${
+                  mealType === "임의"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+              >
                 <input
                   type="radio"
-                  name="mealTime"
-                  value="저녁 식전"
-                  checked={formData.mealTime === "저녁 식전"}
-                  onChange={(e) => handleChange("mealTime", "", e.target.value)}
+                  name="mealType"
+                  value="임의"
+                  checked={mealType === "임의"}
+                  onChange={(e) => handleMealTypeChange(e.target.value)}
                   className="mr-2"
                 />
-                저녁 식전
+                임의
               </label>
-              <label className="flex items-center border border-gray-300 rounded-md p-3">
+              <label
+                className={`flex items-center border rounded-md p-3 ${
+                  mealType === "취침 전"
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+              >
                 <input
                   type="radio"
-                  name="mealTime"
-                  value="저녁 식후"
-                  checked={formData.mealTime === "저녁 식후"}
-                  onChange={(e) => handleChange("mealTime", "", e.target.value)}
-                  className="mr-2"
-                />
-                저녁 식후
-              </label>
-              <label className="flex items-center border border-gray-300 rounded-md p-3">
-                <input
-                  type="radio"
-                  name="mealTime"
+                  name="mealType"
                   value="취침 전"
-                  checked={formData.mealTime === "취침 전"}
-                  onChange={(e) => handleChange("mealTime", "", e.target.value)}
+                  checked={mealType === "취침 전"}
+                  onChange={(e) => handleMealTypeChange(e.target.value)}
                   className="mr-2"
                 />
                 취침 전
               </label>
             </div>
-          </div>
 
-          {/* 음식 검색 */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              음식 검색
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="음식명을 입력하세요"
-                value={formData.food}
-                onChange={(e) => handleChange("food", "", e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10"
-              />
-              <button
-                type="button"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+            {/* 식전/식후 선택은 아침, 점심, 저녁, 간식일 때만 표시 */}
+            {["아침", "점심", "저녁", "간식"].includes(mealType) && (
+              <div className="grid grid-cols-2 gap-2">
+                <label
+                  className={`flex items-center border rounded-md p-3 ${
+                    mealPeriod === "식전"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300"
+                  }`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  <input
+                    type="radio"
+                    name="mealPeriod"
+                    value="식전"
+                    checked={mealPeriod === "식전"}
+                    onChange={(e) => setMealPeriod(e.target.value)}
+                    className="mr-2"
                   />
-                </svg>
-              </button>
-            </div>
+                  식전
+                </label>
+                <label
+                  className={`flex items-center border rounded-md p-3 ${
+                    mealPeriod === "식후"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="mealPeriod"
+                    value="식후"
+                    checked={mealPeriod === "식후"}
+                    onChange={(e) => setMealPeriod(e.target.value)}
+                    className="mr-2"
+                  />
+                  식후
+                </label>
+              </div>
+            )}
           </div>
 
           {/* 혈당 수치 */}
