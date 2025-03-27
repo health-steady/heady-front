@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { mealService } from "../services/meal";
+import toast from "react-hot-toast";
 
 export interface MealInputData {
   mealTime: string;
@@ -13,18 +15,21 @@ export interface MealInputData {
     minute: string;
     period: string;
   };
+  memo: string;
 }
 
 interface MealInputModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: MealInputData) => void;
+  onSubmit: (data: any) => void;
+  selectedDate: Date;
 }
 
 export default function MealInputModal({
   isOpen,
   onClose,
   onSubmit,
+  selectedDate,
 }: MealInputModalProps) {
   // 현재 시간을 기본값으로 설정
   const now = new Date();
@@ -35,7 +40,7 @@ export default function MealInputModal({
   const currentMinute = Math.floor(now.getMinutes() / 5) * 5; // 5분 단위로 내림
   const currentPeriod = now.getHours() >= 12 ? "오후" : "오전";
 
-  const [formData, setFormData] = useState<MealInputData>({
+  const [mealData, setMealData] = useState<MealInputData>({
     mealTime: "",
     food: "",
     date: {
@@ -48,21 +53,27 @@ export default function MealInputModal({
       minute: `${currentMinute.toString().padStart(2, "0")}분`,
       period: currentPeriod,
     },
+    memo: "",
   });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(true);
+  const [foodList, setFoodList] = useState<string[]>([]);
+  const [memo, setMemo] = useState("");
 
   useEffect(() => {
-    // 모달이 열릴 때마다 현재 시간으로 초기화
+    // 모달이 열릴 때마다 초기화
     if (isOpen) {
+      setFoodList([]);
+      setMemo("");
+      // 모달이 열릴 때마다 현재 시간으로 초기화
       const refreshNow = new Date();
       const refreshHour = refreshNow.getHours() % 12 || 12;
       const refreshMinute = Math.floor(refreshNow.getMinutes() / 5) * 5;
       const refreshPeriod = refreshNow.getHours() >= 12 ? "오후" : "오전";
 
-      setFormData({
-        ...formData,
+      setMealData({
+        ...mealData,
         date: {
           year: `${refreshNow.getFullYear()}년`,
           month: `${refreshNow.getMonth() + 1}월`,
@@ -77,17 +88,97 @@ export default function MealInputModal({
     }
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
+
+    if (foodList.length === 0) {
+      toast.error("최소 하나의 음식을 입력해주세요.");
+      return;
+    }
+
+    try {
+      // 시간 데이터 포맷팅
+      const timeString = `${
+        mealData.time.period === "오후"
+          ? (parseInt(mealData.time.hour) + 12).toString()
+          : mealData.time.hour.replace("시", "")
+      }:${mealData.time.minute.replace("분", "")}`;
+
+      // 날짜 데이터 포맷팅
+      const year = parseInt(mealData.date.year);
+      const month = parseInt(mealData.date.month);
+      const day = parseInt(mealData.date.day);
+      const formattedDate = `${year}-${month.toString().padStart(2, "0")}-${day
+        .toString()
+        .padStart(2, "0")}`;
+
+      // 식사 시간 매핑
+      const mealTypeMap: { [key: string]: string } = {
+        아침: "BREAKFAST",
+        점심: "LUNCH",
+        저녁: "DINNER",
+        간식: "SNACK",
+      };
+
+      const response = await mealService.createMeal({
+        mealType: mealTypeMap[mealData.mealTime] as
+          | "BREAKFAST"
+          | "LUNCH"
+          | "DINNER"
+          | "SNACK",
+        mealDateTime: `${formattedDate} ${timeString}`,
+        foodNames: foodList,
+        memo: memo,
+      });
+
+      // 성공 알림 표시
+      toast.success("식사 기록이 완료되었습니다!", {
+        duration: 2000,
+        position: "top-center",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#fff",
+          secondary: "#4CAF50",
+        },
+      });
+
+      onClose();
+      onSubmit(response);
+    } catch (error: any) {
+      console.error("식사 기록 저장 실패:", error);
+
+      // 401 에러가 아닌 경우에만 실패 알림 표시
+      if (error.response?.status !== 401) {
+        toast.error("식사 기록에 실패했습니다. 다시 시도해주세요.", {
+          duration: 3000,
+          position: "top-center",
+          style: {
+            background: "#f44336",
+            color: "#fff",
+            padding: "16px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+          },
+          iconTheme: {
+            primary: "#fff",
+            secondary: "#f44336",
+          },
+        });
+      }
+    }
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setMealData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -98,7 +189,7 @@ export default function MealInputModal({
     field: string,
     value: string
   ) => {
-    setFormData((prev) => ({
+    setMealData((prev) => ({
       ...prev,
       [section]: {
         ...prev[section],
@@ -112,10 +203,21 @@ export default function MealInputModal({
     // 실제 검색 로직은 여기에 구현
     console.log("검색어:", searchTerm);
     // 검색 결과를 food에 설정하는 예시
-    setFormData((prev) => ({
+    setMealData((prev) => ({
       ...prev,
       food: searchTerm,
     }));
+  };
+
+  const handleAddFood = () => {
+    if (mealData.food.trim()) {
+      setFoodList([...foodList, mealData.food.trim()]);
+      setMealData((prev) => ({ ...prev, food: "" }));
+    }
+  };
+
+  const handleRemoveFood = (index: number) => {
+    setFoodList(foodList.filter((_, i) => i !== index));
   };
 
   if (!isOpen) return null;
@@ -139,7 +241,7 @@ export default function MealInputModal({
               </label>
               <select
                 name="mealTime"
-                value={formData.mealTime}
+                value={mealData.mealTime}
                 onChange={handleChange}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
@@ -159,7 +261,7 @@ export default function MealInputModal({
               <div className="flex space-x-2">
                 <select
                   className="border border-gray-300 rounded-md px-3 py-2 flex-1"
-                  value={formData.date.year}
+                  value={mealData.date.year}
                   onChange={(e) =>
                     handleDateTimeChange("date", "year", e.target.value)
                   }
@@ -171,7 +273,7 @@ export default function MealInputModal({
                 </select>
                 <select
                   className="border border-gray-300 rounded-md px-3 py-2 flex-1"
-                  value={formData.date.month}
+                  value={mealData.date.month}
                   onChange={(e) =>
                     handleDateTimeChange("date", "month", e.target.value)
                   }
@@ -184,7 +286,7 @@ export default function MealInputModal({
                 </select>
                 <select
                   className="border border-gray-300 rounded-md px-3 py-2 flex-1"
-                  value={formData.date.day}
+                  value={mealData.date.day}
                   onChange={(e) =>
                     handleDateTimeChange("date", "day", e.target.value)
                   }
@@ -205,7 +307,7 @@ export default function MealInputModal({
               <div className="flex space-x-2">
                 <select
                   className="border border-gray-300 rounded-md px-3 py-2 flex-1"
-                  value={formData.time.period}
+                  value={mealData.time.period}
                   onChange={(e) =>
                     handleDateTimeChange("time", "period", e.target.value)
                   }
@@ -215,7 +317,7 @@ export default function MealInputModal({
                 </select>
                 <select
                   className="border border-gray-300 rounded-md px-3 py-2 flex-1"
-                  value={formData.time.hour}
+                  value={mealData.time.hour}
                   onChange={(e) =>
                     handleDateTimeChange("time", "hour", e.target.value)
                   }
@@ -228,7 +330,7 @@ export default function MealInputModal({
                 </select>
                 <select
                   className="border border-gray-300 rounded-md px-3 py-2 flex-1"
-                  value={formData.time.minute}
+                  value={mealData.time.minute}
                   onChange={(e) =>
                     handleDateTimeChange("time", "minute", e.target.value)
                   }
@@ -295,16 +397,65 @@ export default function MealInputModal({
                   </div>
                 </div>
               ) : (
-                <input
-                  type="text"
-                  name="food"
-                  value={formData.food}
-                  onChange={handleChange}
-                  placeholder="드신 음식을 직접 입력해주세요"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  required
-                />
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      name="food"
+                      value={mealData.food}
+                      onChange={handleChange}
+                      placeholder="드신 음식을 직접 입력해주세요"
+                      className="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      required={foodList.length === 0}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddFood}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                    >
+                      추가
+                    </button>
+                  </div>
+
+                  {foodList.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-gray-700">
+                        추가된 음식
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {foodList.map((food, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg"
+                          >
+                            <span>{food}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFood(index)}
+                              className="text-gray-500 hover:text-gray-700"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                메모
+              </label>
+              <textarea
+                value={memo}
+                onChange={(e) => setMemo(e.target.value)}
+                placeholder="메모를 입력해주세요 (선택사항)"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                rows={3}
+              />
             </div>
 
             <div className="flex justify-end space-x-4">

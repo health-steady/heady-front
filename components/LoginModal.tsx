@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import { authService } from "../services/auth";
+import toast from "react-hot-toast";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -18,15 +20,61 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isMounted, setIsMounted] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(email, password);
+    setError("");
+
+    try {
+      const response = await authService.login({ email, password });
+      localStorage.setItem("accessToken", response.accessToken);
+
+      // 성공 알림 표시
+      toast.success("로그인 성공!", {
+        duration: 2000,
+        position: "top-center",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#fff",
+          secondary: "#4CAF50",
+        },
+      });
+
+      onLogin(email, password);
+      onClose();
+    } catch (error) {
+      console.error("로그인 실패:", error);
+      setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
+
+      // 실패 알림 표시
+      toast.error("로그인에 실패했습니다", {
+        duration: 3000,
+        position: "top-center",
+        style: {
+          background: "#f44336",
+          color: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#fff",
+          secondary: "#f44336",
+        },
+      });
+    }
   };
 
   if (!isOpen || !isMounted) return null;
@@ -78,6 +126,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required
               />
             </div>
 
@@ -91,8 +140,15 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required
               />
             </div>
+
+            {error && (
+              <div className="text-red-500 text-sm mb-4 text-center">
+                {error}
+              </div>
+            )}
 
             <button
               type="submit"

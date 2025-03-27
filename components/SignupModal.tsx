@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { authService } from "../services/auth";
+import toast from "react-hot-toast";
 
 interface SignupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onNext: (data: SignupData) => void;
 }
 
 export interface SignupStep1Data {
@@ -36,11 +37,7 @@ export interface SignupData {
   step3: SignupStep3Data;
 }
 
-const SignupModal: React.FC<SignupModalProps> = ({
-  isOpen,
-  onClose,
-  onNext,
-}) => {
+const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<SignupData>({
     step1: {
@@ -66,6 +63,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
   });
   const [isMounted, setIsMounted] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
@@ -150,13 +148,49 @@ const SignupModal: React.FC<SignupModalProps> = ({
     setStep(3); // 2단계에서 다음 버튼 클릭 시 3단계로 이동
   };
 
-  const handleStep3Submit = (e: React.FormEvent) => {
+  const handleStep3Submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
     if (formData.step3.password !== formData.step3.passwordConfirm) {
       setPasswordError("비밀번호가 일치하지 않습니다");
       return;
     }
-    onNext(formData); // 3단계에서 가입하기 버튼 클릭 시 전체 데이터 제출
+
+    try {
+      const registerData = {
+        email: `${formData.step2.email.id}@${formData.step2.email.domain}`,
+        password: formData.step3.password,
+        name: formData.step1.name,
+        birthdate: formData.step1.birthdate,
+        gender: formData.step1.gender === "남성" ? "MALE" : "FEMALE",
+        phone: `${formData.step2.phone.first}${formData.step2.phone.middle}${formData.step2.phone.last}`,
+      };
+
+      await authService.register(registerData);
+
+      // 성공 알림 표시
+      toast.success("회원가입이 완료되었습니다!", {
+        duration: 3000,
+        position: "top-center",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#fff",
+          secondary: "#4CAF50",
+        },
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+      setError("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
   };
 
   const goBack = () => {
@@ -456,6 +490,10 @@ const SignupModal: React.FC<SignupModalProps> = ({
             : step === 2
             ? renderStep2()
             : renderStep3()}
+
+          {error && (
+            <div className="text-red-500 text-sm mt-4 text-center">{error}</div>
+          )}
         </div>
       </div>
     </div>
