@@ -18,6 +18,23 @@ interface BloodSugarData {
   memo: string;
 }
 
+interface BloodSugarInputData {
+  date: {
+    year: string;
+    month: string;
+    day: string;
+  };
+  time: {
+    hour: string;
+    minute: string;
+    period: "오전" | "오후";
+  };
+  measureType: "BEFORE_MEAL" | "AFTER_MEAL" | "BEFORE_SLEEP" | "RANDOM";
+  mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
+  level: string;
+  memo: string;
+}
+
 const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
   isOpen,
   onClose,
@@ -25,16 +42,19 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
   selectedDate,
 }) => {
   const [isMounted, setIsMounted] = useState(false);
-  const [formData, setFormData] = useState({
-    measureType: "AFTER_MEAL",
-    mealTime: "BREAKFAST",
-    date: selectedDate
-      ? selectedDate.toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
-    time: new Date().toLocaleTimeString("ko-KR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
+  const [formData, setFormData] = useState<BloodSugarInputData>({
+    date: {
+      year: new Date().getFullYear().toString(),
+      month: (new Date().getMonth() + 1).toString().padStart(2, "0"),
+      day: new Date().getDate().toString().padStart(2, "0"),
+    },
+    time: {
+      hour: new Date().getHours().toString().padStart(2, "0"),
+      minute: new Date().getMinutes().toString().padStart(2, "0"),
+      period: new Date().getHours() >= 12 ? "오후" : "오전",
+    },
+    measureType: "BEFORE_MEAL",
+    mealType: "BREAKFAST",
     level: "",
     memo: "",
   });
@@ -48,7 +68,11 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
     if (selectedDate) {
       setFormData((prev) => ({
         ...prev,
-        date: selectedDate.toISOString().split("T")[0],
+        date: {
+          year: selectedDate.getFullYear().toString(),
+          month: (selectedDate.getMonth() + 1).toString().padStart(2, "0"),
+          day: selectedDate.getDate().toString().padStart(2, "0"),
+        },
       }));
     }
   }, [selectedDate]);
@@ -56,9 +80,17 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const [hours, minutes] = formData.time.split(":");
-      const dateTime = new Date(formData.date);
-      dateTime.setHours(parseInt(hours), parseInt(minutes), 0);
+      const timeString = `${formData.time.hour}:${formData.time.minute}`;
+      const dateTime = new Date(
+        formData.date.year +
+          "-" +
+          formData.date.month +
+          "-" +
+          formData.date.day +
+          "T" +
+          timeString +
+          ":00"
+      );
 
       const bloodSugarData: BloodSugarData = {
         measuredAt: dateTime.toISOString().replace("T", " ").slice(0, 16),
@@ -67,7 +99,7 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
           | "AFTER_MEAL"
           | "BEFORE_SLEEP"
           | "RANDOM",
-        mealType: formData.mealTime as
+        mealType: formData.mealType as
           | "BREAKFAST"
           | "LUNCH"
           | "DINNER"
@@ -154,8 +186,8 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
                   식사 시간
                 </label>
                 <select
-                  name="mealTime"
-                  value={formData.mealTime}
+                  name="mealType"
+                  value={formData.mealType}
                   onChange={handleChange}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                   required
@@ -174,9 +206,22 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
               </label>
               <input
                 type="date"
-                value={formData.date}
+                value={
+                  formData.date.year +
+                  "-" +
+                  formData.date.month +
+                  "-" +
+                  formData.date.day
+                }
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, date: e.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    date: {
+                      year: e.target.value.split("-")[0],
+                      month: e.target.value.split("-")[1],
+                      day: e.target.value.split("-")[2],
+                    },
+                  }))
                 }
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
@@ -189,11 +234,15 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
               </label>
               <input
                 type="time"
-                value={formData.time.split(" ")[0]}
+                value={formData.time.hour + ":" + formData.time.minute}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    time: e.target.value,
+                    time: {
+                      hour: e.target.value.split(":")[0],
+                      minute: e.target.value.split(":")[1],
+                      period: prev.time.period,
+                    },
                   }))
                 }
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
