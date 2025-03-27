@@ -98,11 +98,19 @@ export default function MealInputModal({
 
     try {
       // 시간 데이터 포맷팅
-      const timeString = `${
-        mealData.time.period === "오후"
-          ? (parseInt(mealData.time.hour) + 12).toString()
-          : mealData.time.hour.replace("시", "")
-      }:${mealData.time.minute.replace("분", "")}`;
+      const hour = parseInt(mealData.time.hour.replace("시", ""));
+      const minute = parseInt(mealData.time.minute.replace("분", ""));
+      const isPM = mealData.time.period === "오후";
+      const formattedHour = isPM
+        ? hour === 12
+          ? 12
+          : hour + 12
+        : hour === 12
+        ? 0
+        : hour;
+      const timeString = `${formattedHour.toString().padStart(2, "0")}:${minute
+        .toString()
+        .padStart(2, "0")}`;
 
       // 날짜 데이터 포맷팅
       const year = parseInt(mealData.date.year);
@@ -129,23 +137,6 @@ export default function MealInputModal({
         mealDateTime: `${formattedDate} ${timeString}`,
         foodNames: foodList,
         memo: memo,
-      });
-
-      // 성공 알림 표시
-      toast.success("식사 기록이 완료되었습니다!", {
-        duration: 2000,
-        position: "top-center",
-        style: {
-          background: "#4CAF50",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
-        iconTheme: {
-          primary: "#fff",
-          secondary: "#4CAF50",
-        },
       });
 
       onClose();

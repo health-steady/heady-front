@@ -78,23 +78,6 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
 
       await bloodSugarService.record(bloodSugarData);
 
-      // 성공 알림 표시
-      toast.success("혈당 기록이 완료되었습니다!", {
-        duration: 2000,
-        position: "top-center",
-        style: {
-          background: "#4CAF50",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
-        iconTheme: {
-          primary: "#fff",
-          secondary: "#4CAF50",
-        },
-      });
-
       onSubmit(bloodSugarData);
       onClose();
     } catch (error: any) {

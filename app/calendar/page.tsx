@@ -1,38 +1,78 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
-import BloodSugarInputModal, {
-  BloodSugarInputData,
-} from "@/components/BloodSugarInputModal";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+import { bloodSugarService } from "@/services/bloodSugar";
+import { mealService } from "@/services/meal";
+import BloodSugarInputModal from "@/components/BloodSugarInputModal";
 import MealInputModal from "@/components/MealInputModal";
+import { BloodSugarResponse } from "@/services/bloodSugar";
 
 export default function Calendar() {
-  const [currentDate, setCurrentDate] = useState("2025년 1월 11일");
-  const [currentMonth, setCurrentMonth] = useState("2025년 1월");
+  const now = new Date();
+  const [currentDate, setCurrentDate] = useState(now);
+  const [selectedDate, setSelectedDate] = useState<Date>(now);
 
   // 혈당 기록 데이터
-  const [bloodSugarRecords, setBloodSugarRecords] = useState([
-    {
-      id: 1,
-      time: "08:30",
-      value: 123,
-      type: "아침",
-      meal: "현미밥, 된장국, 계란말이",
-      icon: "🌞",
-    },
-    {
-      id: 2,
-      time: "12:45",
-      value: 145,
-      type: "점심",
-      meal: "식후 2시간 - 비빔밥, 미역국",
-      icon: "🍱",
-    },
-  ]);
+  const [bloodSugarRecords, setBloodSugarRecords] = useState<
+    BloodSugarResponse[]
+  >([]);
 
   const [isBloodSugarModalOpen, setIsBloodSugarModalOpen] = useState(false);
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
+
+  // 날짜 포맷팅 함수
+  const formatDate = (date: Date) => {
+    return `${date.getFullYear()}년 ${
+      date.getMonth() + 1
+    }월 ${date.getDate()}일`;
+  };
+
+  const formatMonth = (date: Date) => {
+    return `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
+  };
+
+  // 선택된 날짜의 혈당 기록 조회
+  const fetchBloodSugarRecords = async (date: Date) => {
+    try {
+      const formattedDate = date.toISOString().split("T")[0];
+      const records = await bloodSugarService.getAllByDate(formattedDate);
+      setBloodSugarRecords(records);
+    } catch (error) {
+      console.error("혈당 기록 조회 실패:", error);
+      toast.error("혈당 기록을 불러오는데 실패했습니다.");
+    }
+  };
+
+  useEffect(() => {
+    // 현재 날짜의 혈당 기록 조회
+    fetchBloodSugarRecords(now);
+  }, []);
+
+  // 달력 이동 함수
+  const moveMonth = (direction: "prev" | "next") => {
+    const newDate = new Date(currentDate);
+    if (direction === "prev") {
+      newDate.setMonth(newDate.getMonth() - 1);
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1);
+    }
+    setCurrentDate(newDate);
+  };
+
+  // 날짜 선택 함수
+  const handleDateSelect = (date: number) => {
+    if (!date) return;
+    const selectedDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      date
+    );
+    setSelectedDate(selectedDate);
+    fetchBloodSugarRecords(selectedDate);
+  };
 
   const handleOpenBloodSugarModal = () => {
     setIsBloodSugarModalOpen(true);
@@ -50,53 +90,80 @@ export default function Calendar() {
     setIsMealModalOpen(false);
   };
 
-  const handleSubmitBloodSugar = (data: BloodSugarInputData) => {
-    console.log("혈당 데이터 제출:", data);
-    // 여기서 데이터를 처리하고 상태를 업데이트할 수 있습니다.
-    // 예: API 호출 또는 상태 업데이트
-
-    // 새 기록 추가 예시
-    const newRecord = {
-      id: bloodSugarRecords.length + 1,
-      time: `${data.time.period} ${data.time.hour}`,
-      value: parseInt(data.bloodSugar),
-      type: data.mealTime.split(" ")[0], // "아침 식전" -> "아침"
-      meal: data.food || "기록 없음",
-      icon: data.mealTime.includes("아침")
-        ? "🌞"
-        : data.mealTime.includes("점심")
-        ? "🍱"
-        : "🌙",
-    };
-
-    setBloodSugarRecords([...bloodSugarRecords, newRecord]);
+  const handleBloodSugarSubmit = async (data: any) => {
+    try {
+      await fetchBloodSugarRecords(selectedDate);
+      toast.success("혈당 기록이 완료되었습니다.", {
+        duration: 3000,
+        position: "top-center",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#fff",
+          secondary: "#4CAF50",
+        },
+      });
+      handleCloseBloodSugarModal();
+    } catch (error) {
+      console.error("혈당 기록 갱신 실패:", error);
+    }
   };
 
-  const handleSubmitMeal = (data: any) => {
-    console.log("식사 데이터 제출:", data);
-    // 여기서 데이터를 처리하고 상태를 업데이트할 수 있습니다.
-    // 예: API 호출 또는 상태 업데이트
-
-    // 새 기록 추가 예시
-    const newRecord = {
-      id: bloodSugarRecords.length + 1,
-      time: data.mealTime,
-      value: 0, // 식사 기록의 혈당 값은 0으로 가정
-      type: data.mealTime.split(" ")[0], // "아침 식전" -> "아침"
-      meal: data.food || "기록 없음",
-      icon: "🍽️",
-    };
-
-    setBloodSugarRecords([...bloodSugarRecords, newRecord]);
+  const handleMealSubmit = async (data: any) => {
+    try {
+      await fetchBloodSugarRecords(selectedDate);
+      toast.success("식사 기록이 완료되었습니다.", {
+        duration: 3000,
+        position: "top-center",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#fff",
+          secondary: "#4CAF50",
+        },
+      });
+      handleCloseMealModal();
+    } catch (error) {
+      console.error("식사 기록 갱신 실패:", error);
+    }
   };
 
-  // 2025년 1월 달력 데이터 생성
+  // 혈당 기록 아이콘 매핑
+  const getBloodSugarIcon = (mealType: string) => {
+    switch (mealType) {
+      case "BREAKFAST":
+        return "🌞";
+      case "LUNCH":
+        return "🍱";
+      case "DINNER":
+        return "🌙";
+      default:
+        return "🍽️";
+    }
+  };
+
+  // 달력 데이터 생성
   const days = ["일", "월", "화", "수", "목", "금", "토"];
-
-  // 2025년 1월의 날짜 배열 생성
-  // 2025년 1월 1일은 수요일(3)
-  const firstDayOfMonth = 3; // 0: 일요일, 1: 월요일, ..., 6: 토요일
-  const daysInMonth = 31; // 1월은 31일까지
+  const firstDayOfMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    1
+  ).getDay();
+  const daysInMonth = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() + 1,
+    0
+  ).getDate();
 
   // 달력에 표시할 날짜 배열 생성
   const calendarDays = [];
@@ -106,7 +173,7 @@ export default function Calendar() {
     calendarDays.push(null);
   }
 
-  // 1월 날짜 추가
+  // 해당 월의 날짜 추가
   for (let i = 1; i <= daysInMonth; i++) {
     calendarDays.push(i);
   }
@@ -119,8 +186,6 @@ export default function Calendar() {
     }
   }
 
-  const selectedDate = 11; // 현재 선택된 날짜
-
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-0">
       <div className="w-full max-w-[500px] h-screen sm:h-[915px] relative bg-white overflow-hidden shadow-xl border border-gray-200">
@@ -131,7 +196,9 @@ export default function Calendar() {
               <h1 className="font-bold text-lg sm:text-xl md:text-2xl">
                 혈당 기록
               </h1>
-              <p className="ml-2 text-sm text-gray-500">{currentDate}</p>
+              <p className="ml-2 text-sm text-gray-500">
+                {formatDate(selectedDate)}
+              </p>
             </div>
             <div className="relative">
               <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center transition-all duration-300 hover:scale-110">
@@ -187,7 +254,7 @@ export default function Calendar() {
             {/* 캘린더 */}
             <div className="px-4 py-2">
               <div className="flex justify-between items-center mb-4">
-                <button className="p-1">
+                <button className="p-1" onClick={() => moveMonth("prev")}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -203,8 +270,10 @@ export default function Calendar() {
                     />
                   </svg>
                 </button>
-                <h2 className="text-lg font-bold">{currentMonth}</h2>
-                <button className="p-1">
+                <h2 className="text-lg font-bold">
+                  {formatMonth(currentDate)}
+                </h2>
+                <button className="p-1" onClick={() => moveMonth("next")}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -245,13 +314,16 @@ export default function Calendar() {
                 {calendarDays.map((date, index) => (
                   <div
                     key={`date-${index}`}
-                    className={`py-2 ${
-                      date === selectedDate
+                    className={`py-2 cursor-pointer ${
+                      date === selectedDate.getDate() &&
+                      currentDate.getMonth() === selectedDate.getMonth() &&
+                      currentDate.getFullYear() === selectedDate.getFullYear()
                         ? "bg-blue-500 text-white rounded-full"
                         : date
-                        ? "text-gray-700"
+                        ? "text-gray-700 hover:bg-gray-100 rounded-full"
                         : "text-gray-300"
                     }`}
+                    onClick={() => handleDateSelect(date || 0)}
                   >
                     {date || ""}
                   </div>
@@ -260,23 +332,41 @@ export default function Calendar() {
             </div>
 
             {/* 혈당 기록 목록 */}
-            <div className="px-4 py-2">
+            <div className="space-y-4 p-4">
               {bloodSugarRecords.map((record) => (
-                <div key={record.id} className="border-b border-gray-200 py-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center">
-                      <span className="text-xl mr-2">{record.icon}</span>
-                      <span className="text-base font-medium">
-                        {record.type}
-                      </span>
+                <div
+                  key={record.id}
+                  className="bg-white rounded-lg shadow p-4 flex items-center space-x-4"
+                >
+                  <div className="text-2xl">
+                    {getBloodSugarIcon(record.mealType)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium">
+                      {record.mealType === "BREAKFAST"
+                        ? "아침"
+                        : record.mealType === "LUNCH"
+                        ? "점심"
+                        : record.mealType === "DINNER"
+                        ? "저녁"
+                        : "간식"}
+                      {record.measureType === "BEFORE_MEAL"
+                        ? " 식전"
+                        : record.measureType === "AFTER_MEAL"
+                        ? " 식후"
+                        : record.measureType === "BEFORE_SLEEP"
+                        ? " 취침 전"
+                        : ""}
                     </div>
-                    <span className="text-sm text-gray-500">{record.time}</span>
+                    <div className="text-sm text-gray-500">
+                      {new Date(record.measuredAt).toLocaleTimeString("ko-KR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                   </div>
-                  <div className="flex items-baseline mb-1">
-                    <span className="text-xl font-bold">{record.value}</span>
-                    <span className="text-sm text-gray-500 ml-1">mg/dL</span>
-                  </div>
-                  <p className="text-sm text-gray-600">{record.meal}</p>
+                  <div className="text-xl font-bold">{record.level}</div>
+                  <div className="text-sm text-gray-500">mg/dL</div>
                 </div>
               ))}
             </div>
@@ -321,14 +411,16 @@ export default function Calendar() {
         <BloodSugarInputModal
           isOpen={isBloodSugarModalOpen}
           onClose={handleCloseBloodSugarModal}
-          onSubmit={handleSubmitBloodSugar}
+          onSubmit={handleBloodSugarSubmit}
+          selectedDate={new Date()}
         />
 
         {/* 식사 입력 모달 */}
         <MealInputModal
           isOpen={isMealModalOpen}
           onClose={handleCloseMealModal}
-          onSubmit={handleSubmitMeal}
+          onSubmit={handleMealSubmit}
+          selectedDate={new Date()}
         />
       </div>
     </div>

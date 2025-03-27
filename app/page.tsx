@@ -6,12 +6,11 @@ import BloodSugarSummary from "@/components/BloodSugarSummary";
 import BloodSugarHistory from "@/components/BloodSugarHistory";
 import NutritionSummary from "@/components/NutritionSummary";
 import BottomNavigation from "@/components/BottomNavigation";
-import BloodSugarInputModal, {
-  BloodSugarInputData,
-} from "@/components/BloodSugarInputModal";
+import BloodSugarInputModal from "@/components/BloodSugarInputModal";
 import LoginModal from "@/components/LoginModal";
 import SignupModal, { SignupData } from "@/components/SignupModal";
 import MealInputModal from "@/components/MealInputModal";
+import { toast } from "react-hot-toast";
 
 export default function Home() {
   const [userName, setUserName] = useState("김민수");
@@ -80,10 +79,14 @@ export default function Home() {
     handleCloseSignupModal();
   };
 
-  const handleSubmitBloodSugar = (data: BloodSugarInputData) => {
+  const handleSubmitBloodSugar = (data: any) => {
     console.log("혈당 데이터 제출:", data);
-    // 여기서 데이터를 처리하고 상태를 업데이트할 수 있습니다.
-    // 예: API 호출 또는 상태 업데이트
+    handleBloodSugarSubmit(data);
+  };
+
+  const handleSubmitMeal = (data: any) => {
+    console.log("식사 데이터 제출:", data);
+    handleMealSubmit(data);
   };
 
   const handleOpenBloodSugarModal = () => {
@@ -104,10 +107,50 @@ export default function Home() {
     setIsMealModalOpen(false);
   };
 
-  const handleSubmitMeal = (data: any) => {
-    console.log("식사 데이터 제출:", data);
-    // 여기서 데이터를 처리하고 상태를 업데이트할 수 있습니다.
-    // 예: API 호출 또는 상태 업데이트
+  const handleBloodSugarSubmit = async (data: any) => {
+    try {
+      toast.success("혈당 기록이 완료되었습니다.", {
+        duration: 3000,
+        position: "top-center",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#fff",
+          secondary: "#4CAF50",
+        },
+      });
+      handleCloseBloodSugarModal();
+    } catch (error) {
+      console.error("혈당 기록 실패:", error);
+    }
+  };
+
+  const handleMealSubmit = async (data: any) => {
+    try {
+      toast.success("식사 기록이 완료되었습니다.", {
+        duration: 3000,
+        position: "top-center",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#fff",
+          secondary: "#4CAF50",
+        },
+      });
+      handleCloseMealModal();
+    } catch (error) {
+      console.error("식사 기록 실패:", error);
+    }
   };
 
   return (
@@ -168,6 +211,7 @@ export default function Home() {
         isOpen={isBloodSugarModalOpen}
         onClose={handleCloseBloodSugarModal}
         onSubmit={handleSubmitBloodSugar}
+        selectedDate={new Date()}
       />
 
       {/* 식사 입력 모달 */}
@@ -175,6 +219,7 @@ export default function Home() {
         isOpen={isMealModalOpen}
         onClose={handleCloseMealModal}
         onSubmit={handleSubmitMeal}
+        selectedDate={new Date()}
       />
 
       {/* 로그인 모달 */}
@@ -189,7 +234,6 @@ export default function Home() {
       <SignupModal
         isOpen={isSignupModalOpen}
         onClose={handleCloseSignupModal}
-        onNext={handleSignupSubmit}
       />
     </div>
   );

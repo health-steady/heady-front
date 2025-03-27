@@ -22,7 +22,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // 토큰 만료 시 사용자에게 알림
+      // 토큰 만료 알림 표시
       toast.error("로그인이 만료되었습니다. 다시 로그인해주세요.", {
         duration: 3000,
         position: "top-center",
@@ -44,7 +44,10 @@ api.interceptors.response.use(
 
       // 현재 페이지가 로그인 페이지가 아닐 경우에만 리다이렉트
       if (!window.location.pathname.includes("/login")) {
-        window.location.href = "/login";
+        // 3초 후에 로그인 페이지로 리다이렉트
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 3000);
       }
     }
     return Promise.reject(error);
