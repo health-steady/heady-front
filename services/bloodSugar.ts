@@ -15,6 +15,17 @@ export interface BloodSugarResponse {
   mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
   level: number;
   memo: string;
+  meal?: {
+    id: number;
+    mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
+    mealDateTime: string;
+    memo: string;
+    foods: {
+      id: number;
+      name: string;
+      calories: number;
+    }[];
+  } | null;
 }
 
 export const bloodSugarService = {

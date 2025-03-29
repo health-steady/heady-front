@@ -368,37 +368,70 @@ export default function Calendar() {
               {bloodSugarRecords.map((record) => (
                 <div
                   key={record.id}
-                  className="bg-white rounded-lg shadow p-4 flex items-center space-x-4"
+                  className="bg-white rounded-lg shadow p-4 flex flex-col space-y-2"
                 >
-                  <div className="text-2xl">
-                    {getBloodSugarIcon(record.mealType)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">
-                      {record.mealType === "BREAKFAST"
-                        ? "아침"
-                        : record.mealType === "LUNCH"
-                        ? "점심"
-                        : record.mealType === "DINNER"
-                        ? "저녁"
-                        : "간식"}
-                      {record.measureType === "BEFORE_MEAL"
-                        ? " 식전"
-                        : record.measureType === "AFTER_MEAL"
-                        ? " 식후"
-                        : record.measureType === "BEFORE_SLEEP"
-                        ? " 취침 전"
-                        : ""}
+                  <div className="flex items-center space-x-4">
+                    <div className="text-2xl">
+                      {getBloodSugarIcon(record.mealType)}
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {new Date(record.measuredAt).toLocaleTimeString("ko-KR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <div className="flex-1">
+                      <div className="font-medium">
+                        {record.mealType === "BREAKFAST"
+                          ? "아침"
+                          : record.mealType === "LUNCH"
+                          ? "점심"
+                          : record.mealType === "DINNER"
+                          ? "저녁"
+                          : "간식"}
+                        {record.measureType === "BEFORE_MEAL"
+                          ? " 식전"
+                          : record.measureType === "AFTER_MEAL"
+                          ? " 식후"
+                          : record.measureType === "BEFORE_SLEEP"
+                          ? " 취침 전"
+                          : ""}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {new Date(record.measuredAt).toLocaleTimeString(
+                          "ko-KR",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </div>
                     </div>
+                    <div className="text-xl font-bold">{record.level}</div>
+                    <div className="text-sm text-gray-500">mg/dL</div>
                   </div>
-                  <div className="text-xl font-bold">{record.level}</div>
-                  <div className="text-sm text-gray-500">mg/dL</div>
+
+                  {/* 식사 정보가 있는 경우 음식 태그 표시 */}
+                  {record.meal &&
+                    record.meal.foods &&
+                    record.meal.foods.length > 0 && (
+                      <div className="flex flex-col">
+                        <div className="text-xs text-gray-500 mb-1 flex items-center">
+                          <span className="mr-1">🍽️</span>
+                          <span>섭취 음식</span>
+                          {record.meal.memo && (
+                            <span className="ml-2 italic">
+                              "{record.meal.memo}"
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {record.meal.foods.map((food) => (
+                            <span
+                              key={food.id}
+                              className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full"
+                              title={`${food.calories || 0}kcal`}
+                            >
+                              {food.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                 </div>
               ))}
             </div>
