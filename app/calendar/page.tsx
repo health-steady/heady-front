@@ -30,6 +30,13 @@ export default function Calendar() {
     }월 ${date.getDate()}일`;
   };
 
+  const formatDateForApi = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const formatMonth = (date: Date) => {
     return `${date.getFullYear()}년 ${date.getMonth() + 1}월`;
   };
@@ -37,9 +44,10 @@ export default function Calendar() {
   // 선택된 날짜의 혈당 기록 조회
   const fetchBloodSugarRecords = async (date: Date) => {
     try {
-      const formattedDate = date.toISOString().split("T")[0];
+      const formattedDate = formatDateForApi(date);
       const records = await bloodSugarService.getAllByDate(formattedDate);
       setBloodSugarRecords(records);
+      console.log("혈당 기록 조회 성공:", records, "날짜:", formattedDate);
     } catch (error) {
       console.error("혈당 기록 조회 실패:", error);
       toast.error("혈당 기록을 불러오는데 실패했습니다.");
@@ -47,9 +55,9 @@ export default function Calendar() {
   };
 
   useEffect(() => {
-    // 현재 날짜의 혈당 기록 조회
-    fetchBloodSugarRecords(now);
-  }, []);
+    // 선택된 날짜의 혈당 기록 조회
+    fetchBloodSugarRecords(selectedDate);
+  }, [selectedDate]);
 
   // 달력 이동 함수
   const moveMonth = (direction: "prev" | "next") => {
@@ -147,8 +155,10 @@ export default function Calendar() {
         return "🍱";
       case "DINNER":
         return "🌙";
-      default:
+      case "SNACK":
         return "🍽️";
+      default:
+        return "📊";
     }
   };
 
@@ -175,7 +185,16 @@ export default function Calendar() {
 
   // 해당 월의 날짜 추가
   for (let i = 1; i <= daysInMonth; i++) {
-    calendarDays.push(i);
+    const dateObj = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      i
+    );
+    const dateString = formatDateForApi(dateObj);
+    const records = bloodSugarRecords.filter(
+      (record) => record.measuredAt.split(" ")[0] === dateString
+    );
+    calendarDays.push({ date: i, records });
   }
 
   // 마지막 주 빈 칸 추가 (7의 배수가 되도록)
@@ -311,21 +330,34 @@ export default function Calendar() {
 
               {/* 날짜 */}
               <div className="grid grid-cols-7 text-center">
-                {calendarDays.map((date, index) => (
+                {calendarDays.map((day, index) => (
                   <div
                     key={`date-${index}`}
                     className={`py-2 cursor-pointer ${
-                      date === selectedDate.getDate() &&
+                      day?.date === selectedDate.getDate() &&
                       currentDate.getMonth() === selectedDate.getMonth() &&
                       currentDate.getFullYear() === selectedDate.getFullYear()
                         ? "bg-blue-500 text-white rounded-full"
-                        : date
+                        : day
                         ? "text-gray-700 hover:bg-gray-100 rounded-full"
                         : "text-gray-300"
                     }`}
-                    onClick={() => handleDateSelect(date || 0)}
+                    onClick={() => day && handleDateSelect(day.date)}
                   >
-                    {date || ""}
+                    <div>{day?.date || ""}</div>
+                    {day?.records && day.records.length > 0 && (
+                      <div className="flex flex-wrap justify-center gap-0.5 mt-1">
+                        {day.records.map((record, recordIndex) => (
+                          <span
+                            key={recordIndex}
+                            className="text-[8px]"
+                            title={`${record.measureType} - ${record.level}mg/dL`}
+                          >
+                            {getBloodSugarIcon(record.mealType)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -187,9 +187,12 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
       });
 
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error("회원가입 실패:", error);
-      setError("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.");
+      setError(
+        error.response?.data ||
+          "회원가입 중 오류가 발생했습니다. 다시 시도해주세요."
+      );
     }
   };
 

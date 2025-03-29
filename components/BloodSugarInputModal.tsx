@@ -80,20 +80,13 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const timeString = `${formData.time.hour}:${formData.time.minute}`;
-      const dateTime = new Date(
-        formData.date.year +
-          "-" +
-          formData.date.month +
-          "-" +
-          formData.date.day +
-          "T" +
-          timeString +
-          ":00"
-      );
+      // 날짜와 시간 형식을 직접 구성
+      const formattedDate = `${formData.date.year}-${formData.date.month}-${formData.date.day}`;
+      const formattedTime = `${formData.time.hour}:${formData.time.minute}`;
+      const measuredAt = `${formattedDate} ${formattedTime}`;
 
       const bloodSugarData: BloodSugarData = {
-        measuredAt: dateTime.toISOString().replace("T", " ").slice(0, 16),
+        measuredAt: measuredAt,
         measureType: formData.measureType as
           | "BEFORE_MEAL"
           | "AFTER_MEAL"
