@@ -12,21 +12,35 @@ import SignupModal, { SignupData } from "@/components/SignupModal";
 import MealInputModal from "@/components/MealInputModal";
 import { toast } from "react-hot-toast";
 import { authService, UserInfo } from "@/services/auth";
+import axios from "axios";
+
+// 혈당 데이터 인터페이스
+interface BloodSugarData {
+  breakfast: number | null;
+  lunch: number | null;
+  dinner: number | null;
+  highestFasting: number | null;
+  highestPostprandial: number | null;
+  target?: number;
+  current?: number;
+}
+
+// 회원 정보 인터페이스
+interface MemberData {
+  targetFasting: number;
+  targetPostprandial: number;
+}
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [userName, setUserName] = useState("");
-  const [bloodSugarData, setBloodSugarData] = useState({
-    morning: 123,
-    afternoon: 145,
-    evening: null,
-    target: 140,
-    current: 123,
-    targetFasting: 100,
-    targetPostprandial: 140,
-    currentFasting: 0,
-    currentPostprandial: 0,
+  const [bloodSugarData, setBloodSugarData] = useState<BloodSugarData>({
+    breakfast: null,
+    lunch: null,
+    dinner: null,
+    highestFasting: null,
+    highestPostprandial: null,
   });
 
   const [nutritionData, setNutritionData] = useState({
@@ -41,6 +55,13 @@ export default function Home() {
   const [isBloodSugarModalOpen, setIsBloodSugarModalOpen] = useState(false);
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
 
+  const [memberData, setMemberData] = useState<MemberData>({
+    targetFasting: 100,
+    targetPostprandial: 140,
+  });
+
+  const [isLoading, setIsLoading] = useState(true);
+
   // 로그인 상태 및 사용자 정보 확인
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -50,21 +71,73 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    // 데이터 가져오기
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
+        // 현재 날짜 형식 생성 (YYYY-MM-DD)
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const day = String(today.getDate()).padStart(2, "0");
+        const dateString = `${year}-${month}-${day}`;
+
+        // JWT 토큰 가져오기
+        const token = localStorage.getItem("accessToken");
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+        // 혈당 데이터 가져오기
+        const bloodSugarResponse = await axios.get(
+          `http://localhost:8080/api/bloodSugars/v1/summary?date=${dateString}`,
+          { headers }
+        );
+
+        if (bloodSugarResponse.data) {
+          setBloodSugarData(bloodSugarResponse.data);
+        }
+
+        // 회원 정보 가져오기
+        const memberResponse = await axios.get(
+          "http://localhost:8080/api/members/v1",
+          { headers }
+        );
+
+        if (memberResponse.data) {
+          setMemberData({
+            targetFasting: memberResponse.data.fastingBloodSugar || 100,
+            targetPostprandial:
+              memberResponse.data.postprandialBloodSugar || 140,
+          });
+        }
+      } catch (error) {
+        console.error("데이터 가져오기 실패:", error);
+        // 에러 세부 정보 표시
+        if (axios.isAxiosError(error)) {
+          console.error("상태 코드:", error.response?.status);
+          console.error("에러 메시지:", error.response?.data);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // 최종 혈당 데이터 (회원 정보의 목표치 포함)
+  const combinedBloodSugarData = {
+    ...bloodSugarData,
+    targetFasting: memberData.targetFasting,
+    targetPostprandial: memberData.targetPostprandial,
+  };
+
   const fetchUserInfo = async () => {
     try {
       const userData = await authService.getUserInfo();
       setUserInfo(userData);
       setUserName(userData.name);
-
-      // 혈당 목표치 설정
-      setBloodSugarData((prev) => ({
-        ...prev,
-        target: userData.target.postprandialBloodSugar,
-        targetFasting: userData.target.fastingBloodSugar || 100,
-        targetPostprandial: userData.target.postprandialBloodSugar || 140,
-        currentFasting: prev.morning || 123,
-        currentPostprandial: prev.afternoon || 145,
-      }));
 
       // 영양 목표치 설정
       setNutritionData({
@@ -238,8 +311,16 @@ export default function Home() {
         <div className="h-full overflow-y-auto pt-[85px]">
           <div className="bg-white h-full">
             <div className="h-3 sm:h-4 md:h-5 bg-gray-100"></div>
-            <BloodSugarSummary data={bloodSugarData} />
-            <BloodSugarHistory data={bloodSugarData} />
+            {isLoading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+            ) : (
+              <>
+                <BloodSugarSummary data={combinedBloodSugarData} />
+                <BloodSugarHistory data={combinedBloodSugarData} />
+              </>
+            )}
             <div className="h-2 bg-gray-100"></div>
 
             {/* 버튼 그룹 */}

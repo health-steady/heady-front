@@ -1,11 +1,13 @@
 import React from "react";
 
 interface BloodSugarData {
-  morning: number;
-  afternoon: number;
-  evening: number | null;
-  target: number;
-  current: number;
+  breakfast: number | null; // 아침 혈당 (breakfast로 변경)
+  lunch: number | null; // 점심 혈당 (lunch로 변경)
+  dinner: number | null; // 저녁 혈당 (dinner로 변경)
+  highestFasting: number | null; // 최고 공복혈당
+  highestPostprandial: number | null; // 최고 식후혈당
+  target?: number;
+  current?: number;
 }
 
 interface BloodSugarSummaryProps {
@@ -14,7 +16,7 @@ interface BloodSugarSummaryProps {
 
 const BloodSugarSummary: React.FC<BloodSugarSummaryProps> = ({ data }) => {
   return (
-    <div className="p-4 sm:p-5 md:p-6 pb-3 sm:pb-3 md:pb-3">
+    <div className="p-4 sm:p-5 md:p-6 pb-3 sm:pb-3 md:pb-3 mb-2">
       <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-2">
         {/* 아침 혈당 */}
         <div className="bg-green-50 p-3 sm:p-4 md:p-5 rounded-lg transition-all duration-300 hover:shadow-md">
@@ -35,10 +37,12 @@ const BloodSugarSummary: React.FC<BloodSugarSummaryProps> = ({ data }) => {
             </svg>
             아침
           </div>
-          <div className="text-lg sm:text-xl md:text-2xl font-bold">
-            {data.morning}
+          <div className="text-center">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold">
+              {data.breakfast !== null ? data.breakfast : "--"}
+            </div>
+            <div className="text-xs sm:text-sm text-gray-500">mg/dL</div>
           </div>
-          <div className="text-xs sm:text-sm text-gray-500">mg/dL</div>
         </div>
 
         {/* 점심 혈당 */}
@@ -60,10 +64,12 @@ const BloodSugarSummary: React.FC<BloodSugarSummaryProps> = ({ data }) => {
             </svg>
             점심
           </div>
-          <div className="text-lg sm:text-xl md:text-2xl font-bold">
-            {data.afternoon}
+          <div className="text-center">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold">
+              {data.lunch !== null ? data.lunch : "--"}
+            </div>
+            <div className="text-xs sm:text-sm text-gray-500">mg/dL</div>
           </div>
-          <div className="text-xs sm:text-sm text-gray-500">mg/dL</div>
         </div>
 
         {/* 저녁 혈당 */}
@@ -85,10 +91,12 @@ const BloodSugarSummary: React.FC<BloodSugarSummaryProps> = ({ data }) => {
             </svg>
             저녁
           </div>
-          <div className="text-lg sm:text-xl md:text-2xl font-bold">
-            {data.evening ? data.evening : "--"}
+          <div className="text-center">
+            <div className="text-lg sm:text-xl md:text-2xl font-bold">
+              {data.dinner !== null ? data.dinner : "--"}
+            </div>
+            <div className="text-xs sm:text-sm text-gray-500">mg/dL</div>
           </div>
-          <div className="text-xs sm:text-sm text-gray-500">mg/dL</div>
         </div>
       </div>
     </div>

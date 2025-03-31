@@ -31,7 +31,7 @@ export default function Header({
         </div>
         <div>
           <h1 className="font-bold text-base sm:text-lg md:text-xl">
-            혈당 관리
+            오늘의 혈당
           </h1>
           <p className="text-xs sm:text-sm text-gray-500">
             {userName ? `${userName}님 환영합니다` : "로그인하세요"}

@@ -1,15 +1,15 @@
 import React from "react";
 
 interface BloodSugarData {
-  morning: number;
-  afternoon: number;
-  evening: number | null;
-  target: number;
-  current: number;
+  breakfast: number | null; // 아침 혈당 (breakfast로 변경)
+  lunch: number | null; // 점심 혈당 (lunch로 변경)
+  dinner: number | null; // 저녁 혈당 (dinner로 변경)
+  target?: number;
+  current?: number;
   targetFasting?: number; // 목표 공복혈당
   targetPostprandial?: number; // 목표 식후혈당
-  currentFasting?: number; // 최근 공복혈당
-  currentPostprandial?: number; // 최근 식후혈당
+  highestFasting: number | null; // 최고 공복혈당
+  highestPostprandial: number | null; // 최고 식후혈당
 }
 
 interface BloodSugarHistoryProps {
@@ -20,8 +20,9 @@ const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
   // 기본값 설정 (API에서 값이 오지 않을 경우 대비)
   const targetFasting = data.targetFasting || 100; // 일반적인 공복혈당 목표값
   const targetPostprandial = data.targetPostprandial || data.target || 140; // 일반적인 식후혈당 목표값
-  const currentFasting = data.currentFasting || data.morning || 0;
-  const currentPostprandial = data.currentPostprandial || data.afternoon || 0;
+  const highestFasting = data.highestFasting !== null ? data.highestFasting : 0;
+  const highestPostprandial =
+    data.highestPostprandial !== null ? data.highestPostprandial : 0;
 
   // 혈당 상태에 따른 색상 결정 함수
   const getStatusColor = (current: number, target: number) => {
@@ -164,38 +165,27 @@ const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
 
           <div className="space-y-3">
             <div className="flex items-center">
-              <span className="text-gray-500 font-medium w-12">목표</span>
-              <span className="font-bold text-lg text-gray-800">
-                {targetFasting} mg/dL
-              </span>
+              <span className="w-12 text-gray-600">목표</span>
+              <span className="text-gray-900">{targetFasting} mg/dL</span>
             </div>
 
             <div className="flex items-center">
-              <span className="text-gray-500 font-medium w-12">최고</span>
-              {currentFasting > 0 ? (
-                <span
-                  className={`font-bold text-lg ${getStatusColor(
-                    currentFasting,
-                    targetFasting
-                  )}`}
-                >
-                  {currentFasting} mg/dL
-                </span>
-              ) : (
-                <span className="text-gray-400 font-medium">기록 없음</span>
-              )}
+              <span className="w-12 text-gray-600">최고</span>
+              <span className="text-gray-900">
+                {highestFasting > 0 ? `${highestFasting} mg/dL` : "--"}
+              </span>
             </div>
 
-            {currentFasting > 0 && (
+            {highestFasting > 0 && (
               <div className="pt-2">
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full ${getStatusColor(
-                      currentFasting,
+                      highestFasting,
                       targetFasting
                     ).replace("text-", "bg-")}`}
                     style={{
-                      width: `${getPercentage(currentFasting, targetFasting)}%`,
+                      width: `${getPercentage(highestFasting, targetFasting)}%`,
                     }}
                   ></div>
                 </div>
@@ -212,39 +202,30 @@ const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
 
           <div className="space-y-3">
             <div className="flex items-center">
-              <span className="text-gray-500 font-medium w-12">목표</span>
-              <span className="font-bold text-lg text-gray-800">
-                {targetPostprandial} mg/dL
-              </span>
+              <span className="w-12 text-gray-600">목표</span>
+              <span className="text-gray-900">{targetPostprandial} mg/dL</span>
             </div>
 
             <div className="flex items-center">
-              <span className="text-gray-500 font-medium w-12">최고</span>
-              {currentPostprandial > 0 ? (
-                <span
-                  className={`font-bold text-lg ${getStatusColor(
-                    currentPostprandial,
-                    targetPostprandial
-                  )}`}
-                >
-                  {currentPostprandial} mg/dL
-                </span>
-              ) : (
-                <span className="text-gray-400 font-medium">기록 없음</span>
-              )}
+              <span className="w-12 text-gray-600">최고</span>
+              <span className="text-gray-900">
+                {highestPostprandial > 0
+                  ? `${highestPostprandial} mg/dL`
+                  : "--"}
+              </span>
             </div>
 
-            {currentPostprandial > 0 && (
+            {highestPostprandial > 0 && (
               <div className="pt-2">
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full ${getStatusColor(
-                      currentPostprandial,
+                      highestPostprandial,
                       targetPostprandial
                     ).replace("text-", "bg-")}`}
                     style={{
                       width: `${getPercentage(
-                        currentPostprandial,
+                        highestPostprandial,
                         targetPostprandial
                       )}%`,
                     }}
