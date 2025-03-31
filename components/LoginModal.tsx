@@ -35,23 +35,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
       const response = await authService.login({ email, password });
       localStorage.setItem("accessToken", response.accessToken);
 
-      // 성공 알림 표시
-      toast.success("로그인 성공!", {
-        duration: 2000,
-        position: "top-center",
-        style: {
-          background: "#4CAF50",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
-        iconTheme: {
-          primary: "#fff",
-          secondary: "#4CAF50",
-        },
-      });
-
       onLogin(email, password);
       onClose();
     } catch (error) {

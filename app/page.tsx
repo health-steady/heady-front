@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import BloodSugarSummary from "@/components/BloodSugarSummary";
 import BloodSugarHistory from "@/components/BloodSugarHistory";
@@ -11,15 +11,22 @@ import LoginModal from "@/components/LoginModal";
 import SignupModal, { SignupData } from "@/components/SignupModal";
 import MealInputModal from "@/components/MealInputModal";
 import { toast } from "react-hot-toast";
+import { authService, UserInfo } from "@/services/auth";
 
 export default function Home() {
-  const [userName, setUserName] = useState("김민수");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [userName, setUserName] = useState("");
   const [bloodSugarData, setBloodSugarData] = useState({
     morning: 123,
     afternoon: 145,
     evening: null,
     target: 140,
     current: 123,
+    targetFasting: 100,
+    targetPostprandial: 140,
+    currentFasting: 0,
+    currentPostprandial: 0,
   });
 
   const [nutritionData, setNutritionData] = useState({
@@ -33,6 +40,51 @@ export default function Home() {
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
   const [isBloodSugarModalOpen, setIsBloodSugarModalOpen] = useState(false);
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
+
+  // 로그인 상태 및 사용자 정보 확인
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      setIsLoggedIn(true);
+      fetchUserInfo();
+    }
+  }, []);
+
+  const fetchUserInfo = async () => {
+    try {
+      const userData = await authService.getUserInfo();
+      setUserInfo(userData);
+      setUserName(userData.name);
+
+      // 혈당 목표치 설정
+      setBloodSugarData((prev) => ({
+        ...prev,
+        target: userData.target.postprandialBloodSugar,
+        targetFasting: userData.target.fastingBloodSugar || 100,
+        targetPostprandial: userData.target.postprandialBloodSugar || 140,
+        currentFasting: prev.morning || 123,
+        currentPostprandial: prev.afternoon || 145,
+      }));
+
+      // 영양 목표치 설정
+      setNutritionData({
+        carbs: {
+          current: Math.floor(Math.random() * userData.target.carbohydrate),
+          target: userData.target.carbohydrate,
+        },
+        protein: {
+          current: Math.floor(Math.random() * userData.target.protein),
+          target: userData.target.protein,
+        },
+        fat: {
+          current: Math.floor(Math.random() * userData.target.fat),
+          target: userData.target.fat,
+        },
+      });
+    } catch (error) {
+      console.error("사용자 정보 가져오기 실패:", error);
+    }
+  };
 
   const handleOpenModal = () => {
     console.log("모달 열기 버튼 클릭됨");
@@ -62,11 +114,31 @@ export default function Home() {
     setIsSignupModalOpen(false);
   };
 
-  const handleLogin = (email: string, password: string) => {
-    console.log("로그인 시도:", email, password);
-    // 여기서 로그인 로직을 구현할 수 있습니다.
-    // 예: API 호출 또는 상태 업데이트
-    handleCloseLoginModal();
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      const response = await authService.login({ email, password });
+      localStorage.setItem("accessToken", response.accessToken);
+      setIsLoggedIn(true);
+      await fetchUserInfo();
+      handleCloseLoginModal();
+      toast.success("로그인에 성공했습니다.", {
+        duration: 3000,
+        position: "top-center",
+        style: {
+          background: "#4CAF50",
+          color: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+      });
+    } catch (error) {
+      console.error("로그인 실패:", error);
+      toast.error("로그인에 실패했습니다.", {
+        duration: 3000,
+        position: "top-center",
+      });
+    }
   };
 
   const handleSignupSubmit = (data: SignupData) => {
@@ -157,7 +229,11 @@ export default function Home() {
     <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-0">
       <div className="w-full max-w-[500px] h-screen sm:h-[915px] relative bg-white overflow-hidden shadow-xl border border-gray-200">
         <div className="fixed top-0 left-0 right-0 max-w-[500px] mx-auto bg-white z-10">
-          <Header userName={userName} onProfileClick={handleOpenLoginModal} />
+          <Header
+            userName={userName}
+            onProfileClick={handleOpenLoginModal}
+            profileImageUrl={userInfo?.profileImageUrl}
+          />
         </div>
         <div className="h-full overflow-y-auto pt-[85px]">
           <div className="bg-white h-full">

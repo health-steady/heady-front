@@ -4,9 +4,14 @@ import Image from "next/image";
 interface HeaderProps {
   userName: string;
   onProfileClick: () => void;
+  profileImageUrl?: string | null;
 }
 
-export default function Header({ userName, onProfileClick }: HeaderProps) {
+export default function Header({
+  userName,
+  onProfileClick,
+  profileImageUrl,
+}: HeaderProps) {
   return (
     <div className="flex justify-between items-center p-3 py-4 sm:p-4 sm:py-5 md:p-5 md:py-6 border-b border-gray-200">
       <div className="flex items-center">
@@ -15,7 +20,7 @@ export default function Header({ userName, onProfileClick }: HeaderProps) {
           onClick={onProfileClick}
         >
           <img
-            src="/default-profile.png"
+            src={profileImageUrl || "/default-profile.png"}
             alt="프로필 이미지"
             className="w-full h-full object-cover"
             onError={(e) => {

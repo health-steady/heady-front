@@ -14,8 +14,8 @@ interface BloodSugarSummaryProps {
 
 const BloodSugarSummary: React.FC<BloodSugarSummaryProps> = ({ data }) => {
   return (
-    <div className="p-4 sm:p-5 md:p-6">
-      <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-3">
+    <div className="p-4 sm:p-5 md:p-6 pb-3 sm:pb-3 md:pb-3">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 md:gap-5 mb-2">
         {/* 아침 혈당 */}
         <div className="bg-green-50 p-3 sm:p-4 md:p-5 rounded-lg transition-all duration-300 hover:shadow-md">
           <div className="text-xs sm:text-sm text-green-600 mb-1 flex items-center">

@@ -1,19 +1,81 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import BottomNavigation from "@/components/BottomNavigation";
+import { authService, UserInfo, Target } from "@/services/auth";
 
 export default function Profile() {
-  const [userInfo, setUserInfo] = useState({
-    name: "김민수",
-    gender: "남성",
-    age: "25세",
-    height: 175,
-    weight: 75,
-    bmi: 24.5,
+  const router = useRouter();
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [localUserInfo, setLocalUserInfo] = useState({
+    name: "",
+    gender: "",
+    birthdate: "",
+    height: 0,
+    weight: 0,
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      router.push("/");
+      toast.error("로그인이 필요합니다.");
+      return;
+    }
+
+    fetchUserInfo();
+  }, [router]);
+
+  const fetchUserInfo = async () => {
+    setIsLoading(true);
+    try {
+      const userData = await authService.getUserInfo();
+      setUserInfo(userData);
+      setLocalUserInfo({
+        name: userData.name,
+        gender: userData.nickname.includes("남성") ? "남성" : "여성",
+        birthdate: userData.birthdate,
+        height: userData.height,
+        weight: userData.weight,
+      });
+    } catch (error) {
+      console.error("사용자 정보 가져오기 실패:", error);
+      toast.error("사용자 정보를 불러오는데 실패했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    router.push("/");
+    toast.success("로그아웃 되었습니다.");
+  };
+
+  // BMI 계산
+  const calculateBMI = () => {
+    if (!localUserInfo.height || !localUserInfo.weight) return 0;
+    const heightInMeters = localUserInfo.height / 100;
+    return (localUserInfo.weight / (heightInMeters * heightInMeters)).toFixed(
+      1
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-0">
+        <div className="w-full max-w-[500px] h-screen sm:h-[915px] relative bg-white overflow-hidden shadow-xl border border-gray-200 flex justify-center items-center">
+          <div className="text-center">
+            <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-500">정보를 불러오는 중...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-0">
@@ -23,30 +85,15 @@ export default function Profile() {
           <div className="flex justify-between items-center p-3 py-4 sm:p-4 sm:py-5 md:p-5 md:py-6 border-b border-gray-200">
             <div className="flex items-center">
               <h1 className="font-bold text-lg sm:text-xl md:text-2xl">
-                프로필
+                내 정보
               </h1>
             </div>
-            <div className="relative">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                  />
-                </svg>
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center text-xs sm:text-sm">
-                  2
-                </span>
-              </div>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+            >
+              로그아웃
+            </button>
           </div>
         </div>
         <div className="h-full overflow-y-auto pt-[85px]">
@@ -61,10 +108,16 @@ export default function Profile() {
 
               <div className="flex justify-center mb-4">
                 <div className="relative">
-                  <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden">
-                    <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-600 text-2xl">
-                      {userInfo.name.charAt(0)}
-                    </div>
+                  <div className="w-24 h-24 rounded-full bg-blue-100 overflow-hidden border-2 border-blue-300">
+                    <img
+                      src={userInfo?.profileImageUrl || "/default-profile.png"}
+                      alt="프로필 이미지"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src =
+                          "https://via.placeholder.com/150?text=사용자";
+                      }}
+                    />
                   </div>
                   <div className="absolute bottom-0 right-0 bg-black rounded-full p-2">
                     <svg
@@ -96,7 +149,7 @@ export default function Profile() {
                   <span className="text-base">이름</span>
                   <div className="flex items-center">
                     <span className="text-base font-medium">
-                      {userInfo.name}
+                      {localUserInfo.name}
                     </span>
                     <button className="ml-2">
                       <svg
@@ -121,7 +174,7 @@ export default function Profile() {
                   <span className="text-base">성별</span>
                   <div className="flex items-center">
                     <span className="text-base font-medium">
-                      {userInfo.gender}
+                      {localUserInfo.gender}
                     </span>
                     <button className="ml-2">
                       <svg
@@ -143,10 +196,10 @@ export default function Profile() {
                 </div>
 
                 <div className="flex justify-between items-center border-b pb-2">
-                  <span className="text-base">나이</span>
+                  <span className="text-base">생년월일</span>
                   <div className="flex items-center">
                     <span className="text-base font-medium">
-                      {userInfo.age}
+                      {localUserInfo.birthdate}
                     </span>
                     <button className="ml-2">
                       <svg
@@ -170,14 +223,14 @@ export default function Profile() {
             </div>
 
             {/* 신체 정보 */}
-            <div className="p-4 bg-white rounded-lg shadow-sm">
+            <div className="p-4 bg-white rounded-lg shadow-sm mb-2">
               <h2 className="text-lg font-bold mb-4">신체 정보</h2>
 
               <div className="flex justify-center mb-6">
                 <div className="relative w-40 h-40">
                   <div className="w-full h-full rounded-full border-8 border-blue-400 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{userInfo.bmi}</div>
+                      <div className="text-3xl font-bold">{calculateBMI()}</div>
                       <div className="text-sm text-gray-500">BMI</div>
                     </div>
                   </div>
@@ -190,11 +243,11 @@ export default function Profile() {
                   <div className="flex items-center border rounded-md overflow-hidden">
                     <input
                       type="number"
-                      value={userInfo.height}
+                      value={localUserInfo.height}
                       onChange={(e) =>
-                        setUserInfo({
-                          ...userInfo,
-                          height: parseInt(e.target.value),
+                        setLocalUserInfo({
+                          ...localUserInfo,
+                          height: parseFloat(e.target.value),
                         })
                       }
                       className="w-20 p-2 text-right outline-none"
@@ -208,11 +261,11 @@ export default function Profile() {
                   <div className="flex items-center border rounded-md overflow-hidden">
                     <input
                       type="number"
-                      value={userInfo.weight}
+                      value={localUserInfo.weight}
                       onChange={(e) =>
-                        setUserInfo({
-                          ...userInfo,
-                          weight: parseInt(e.target.value),
+                        setLocalUserInfo({
+                          ...localUserInfo,
+                          weight: parseFloat(e.target.value),
                         })
                       }
                       className="w-20 p-2 text-right outline-none"
@@ -222,10 +275,86 @@ export default function Profile() {
                 </div>
               </div>
             </div>
+
+            {/* 목표 설정 섹션 */}
+            {userInfo?.target && (
+              <div className="p-4 bg-white rounded-lg shadow-sm mb-2">
+                <h2 className="text-lg font-bold mb-3">목표 설정</h2>
+
+                <h3 className="font-medium text-sm text-gray-600 mb-2">
+                  혈당 목표
+                </h3>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">공복 혈당</p>
+                    <p className="font-medium">
+                      {userInfo.target.fastingBloodSugar} mg/dL
+                    </p>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">식후 혈당</p>
+                    <p className="font-medium">
+                      {userInfo.target.postprandialBloodSugar} mg/dL
+                    </p>
+                  </div>
+                </div>
+
+                <h3 className="font-medium text-sm text-gray-600 mb-2">
+                  영양 목표
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">탄수화물</p>
+                    <p className="font-medium">
+                      {userInfo.target.carbohydrate.toFixed(1)}g
+                    </p>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">단백질</p>
+                    <p className="font-medium">
+                      {userInfo.target.protein.toFixed(1)}g
+                    </p>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">지방</p>
+                    <p className="font-medium">
+                      {userInfo.target.fat.toFixed(1)}g
+                    </p>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <p className="text-xs text-gray-500">칼로리</p>
+                    <p className="font-medium">
+                      {userInfo.target.calories} kcal
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 계정 정보 섹션 */}
+            {userInfo && (
+              <div className="p-4 bg-white rounded-lg shadow-sm">
+                <h2 className="text-lg font-bold mb-3">계정 정보</h2>
+                <div className="space-y-2">
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <p className="text-gray-500">이메일</p>
+                    <p>{userInfo.email}</p>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <p className="text-gray-500">가입일</p>
+                    <p>{new Date(userInfo.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <p className="text-gray-500">최근 정보 수정일</p>
+                    <p>{new Date(userInfo.updatedAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="fixed bottom-0 left-0 right-0 max-w-[500px] mx-auto bg-white border-t border-gray-200">
-          <BottomNavigation activePage="profile" />
+          <BottomNavigation activePage="mypage" />
         </div>
       </div>
     </div>

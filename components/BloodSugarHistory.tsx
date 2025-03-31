@@ -6,6 +6,10 @@ interface BloodSugarData {
   evening: number | null;
   target: number;
   current: number;
+  targetFasting?: number; // 목표 공복혈당
+  targetPostprandial?: number; // 목표 식후혈당
+  currentFasting?: number; // 최근 공복혈당
+  currentPostprandial?: number; // 최근 식후혈당
 }
 
 interface BloodSugarHistoryProps {
@@ -13,23 +17,241 @@ interface BloodSugarHistoryProps {
 }
 
 const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
+  // 기본값 설정 (API에서 값이 오지 않을 경우 대비)
+  const targetFasting = data.targetFasting || 100; // 일반적인 공복혈당 목표값
+  const targetPostprandial = data.targetPostprandial || data.target || 140; // 일반적인 식후혈당 목표값
+  const currentFasting = data.currentFasting || data.morning || 0;
+  const currentPostprandial = data.currentPostprandial || data.afternoon || 0;
+
+  // 혈당 상태에 따른 색상 결정 함수
+  const getStatusColor = (current: number, target: number) => {
+    if (current === 0) return "text-gray-400"; // 데이터 없음
+    if (current > target * 1.3) return "text-red-500"; // 목표보다 30% 이상 높음 - 위험
+    if (current > target) return "text-orange-500"; // 목표보다 높음 - 주의
+    if (current < target * 0.7) return "text-blue-500"; // 목표보다 30% 이상 낮음 - 저혈당 주의
+    return "text-green-500"; // 목표 범위 내 - 좋음
+  };
+
+  // 혈당 상태 메시지
+  const getStatusMessage = (current: number, target: number) => {
+    if (current === 0) return "데이터 없음";
+    if (current > target * 1.3) return "목표보다 높음 (주의)";
+    if (current > target) return "목표보다 약간 높음";
+    if (current < target * 0.7) return "목표보다 낮음 (주의)";
+    return "목표 범위 내";
+  };
+
+  // 차이 계산 및 표시
+  const getDifference = (current: number, target: number) => {
+    if (current === 0) return "";
+    const diff = current - target;
+    return diff >= 0 ? `+${diff}` : `${diff}`;
+  };
+
+  // 배경색 결정 함수
+  const getBackgroundColor = (current: number, target: number) => {
+    if (current === 0) return "bg-gray-50";
+    if (current > target * 1.3) return "bg-red-50";
+    if (current > target) return "bg-orange-50";
+    if (current < target * 0.7) return "bg-blue-50";
+    return "bg-green-50";
+  };
+
+  // 아이콘 결정 함수
+  const getStatusIcon = (current: number, target: number) => {
+    if (current === 0) {
+      return (
+        <svg
+          className="w-5 h-5 text-gray-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      );
+    }
+    if (current > target * 1.3) {
+      return (
+        <svg
+          className="w-5 h-5 text-red-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          />
+        </svg>
+      );
+    }
+    if (current > target) {
+      return (
+        <svg
+          className="w-5 h-5 text-orange-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+          />
+        </svg>
+      );
+    }
+    if (current < target * 0.7) {
+      return (
+        <svg
+          className="w-5 h-5 text-blue-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"
+          />
+        </svg>
+      );
+    }
+    return (
+      <svg
+        className="w-5 h-5 text-green-500"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M5 13l4 4L19 7"
+        />
+      </svg>
+    );
+  };
+
+  // 진행 상태 퍼센트 계산
+  const getPercentage = (current: number, target: number) => {
+    if (current === 0) return 0;
+    // 목표 대비 비율 (목표가 100%가 되도록)
+    const percentage = (current / target) * 100;
+    // 5% ~ 95% 사이로 제한
+    return Math.min(Math.max(percentage, 5), 95);
+  };
+
   return (
-    <div className="p-4 sm:p-5 md:p-6 pt-0 sm:pt-1">
-      <div className="flex justify-between mb-4">
-        <div className="transition-all duration-300 hover:scale-105">
-          <div className="text-xs sm:text-sm md:text-base text-gray-500">
-            목표 혈당
-          </div>
-          <div className="text-lg sm:text-xl md:text-2xl font-bold">
-            {data.target} mg/dL
+    <div className="p-4 sm:p-5 md:p-6 pt-2 sm:pt-2 md:pt-2 -mt-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* 공복 혈당 카드 */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <h4 className="font-medium text-gray-700 mb-3 text-center">
+            공복혈당
+          </h4>
+
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <span className="text-gray-500 font-medium w-12">목표</span>
+              <span className="font-bold text-lg text-gray-800">
+                {targetFasting} mg/dL
+              </span>
+            </div>
+
+            <div className="flex items-center">
+              <span className="text-gray-500 font-medium w-12">최고</span>
+              {currentFasting > 0 ? (
+                <span
+                  className={`font-bold text-lg ${getStatusColor(
+                    currentFasting,
+                    targetFasting
+                  )}`}
+                >
+                  {currentFasting} mg/dL
+                </span>
+              ) : (
+                <span className="text-gray-400 font-medium">기록 없음</span>
+              )}
+            </div>
+
+            {currentFasting > 0 && (
+              <div className="pt-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full ${getStatusColor(
+                      currentFasting,
+                      targetFasting
+                    ).replace("text-", "bg-")}`}
+                    style={{
+                      width: `${getPercentage(currentFasting, targetFasting)}%`,
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
-        <div className="transition-all duration-300 hover:scale-105">
-          <div className="text-xs sm:text-sm md:text-base text-gray-500">
-            현재 혈당
-          </div>
-          <div className="text-lg sm:text-xl md:text-2xl font-bold">
-            {data.current} mg/dL
+
+        {/* 식후 혈당 카드 */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <h4 className="font-medium text-gray-700 mb-3 text-center">
+            식후혈당
+          </h4>
+
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <span className="text-gray-500 font-medium w-12">목표</span>
+              <span className="font-bold text-lg text-gray-800">
+                {targetPostprandial} mg/dL
+              </span>
+            </div>
+
+            <div className="flex items-center">
+              <span className="text-gray-500 font-medium w-12">최고</span>
+              {currentPostprandial > 0 ? (
+                <span
+                  className={`font-bold text-lg ${getStatusColor(
+                    currentPostprandial,
+                    targetPostprandial
+                  )}`}
+                >
+                  {currentPostprandial} mg/dL
+                </span>
+              ) : (
+                <span className="text-gray-400 font-medium">기록 없음</span>
+              )}
+            </div>
+
+            {currentPostprandial > 0 && (
+              <div className="pt-2">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full ${getStatusColor(
+                      currentPostprandial,
+                      targetPostprandial
+                    ).replace("text-", "bg-")}`}
+                    style={{
+                      width: `${getPercentage(
+                        currentPostprandial,
+                        targetPostprandial
+                      )}%`,
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
