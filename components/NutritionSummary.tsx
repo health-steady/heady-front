@@ -27,7 +27,7 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data }) => {
         <div className="flex justify-between mb-1 sm:mb-2">
           <span className="text-xs sm:text-sm md:text-base">탄수화물</span>
           <span className="text-xs sm:text-sm md:text-base">
-            {data.carbs.current}/{data.carbs.target}g
+            {data.carbs.current.toFixed(1)}/{data.carbs.target}g
           </span>
         </div>
         <div className="progress-bar bg-gray-100">
@@ -48,7 +48,7 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data }) => {
         <div className="flex justify-between mb-1 sm:mb-2">
           <span className="text-xs sm:text-sm md:text-base">단백질</span>
           <span className="text-xs sm:text-sm md:text-base">
-            {data.protein.current}/{data.protein.target}g
+            {data.protein.current.toFixed(1)}/{data.protein.target}g
           </span>
         </div>
         <div className="progress-bar bg-gray-100">
@@ -69,7 +69,7 @@ const NutritionSummary: React.FC<NutritionSummaryProps> = ({ data }) => {
         <div className="flex justify-between mb-1 sm:mb-2">
           <span className="text-xs sm:text-sm md:text-base">지방</span>
           <span className="text-xs sm:text-sm md:text-base">
-            {data.fat.current}/{data.fat.target}g
+            {data.fat.current.toFixed(1)}/{data.fat.target}g
           </span>
         </div>
         <div className="progress-bar bg-gray-100">

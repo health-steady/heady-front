@@ -31,6 +31,13 @@ interface MemberData {
   targetPostprandial: number;
 }
 
+// 영양소 데이터 인터페이스
+interface NutrientData {
+  carbohydrate: number;
+  protein: number;
+  fat: number;
+}
+
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -44,9 +51,9 @@ export default function Home() {
   });
 
   const [nutritionData, setNutritionData] = useState({
-    carbs: { current: 42, target: 77 },
-    protein: { current: 85, target: 136 },
-    fat: { current: 20, target: 40 },
+    carbs: { current: 0, target: 77 },
+    protein: { current: 0, target: 136 },
+    fat: { current: 0, target: 40 },
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -110,6 +117,47 @@ export default function Home() {
             targetPostprandial:
               memberResponse.data.postprandialBloodSugar || 140,
           });
+
+          // 영양 목표치 설정
+          if (memberResponse.data.target) {
+            setNutritionData((prev) => ({
+              carbs: {
+                ...prev.carbs,
+                target: memberResponse.data.target.carbohydrate || 77,
+              },
+              protein: {
+                ...prev.protein,
+                target: memberResponse.data.target.protein || 136,
+              },
+              fat: {
+                ...prev.fat,
+                target: memberResponse.data.target.fat || 40,
+              },
+            }));
+          }
+        }
+
+        // 영양소 섭취 데이터 가져오기
+        const nutrientResponse = await axios.get(
+          `http://localhost:8080/api/meals/v1/nutrients/summary?date=${dateString}`,
+          { headers }
+        );
+
+        if (nutrientResponse.data) {
+          setNutritionData((prev) => ({
+            carbs: {
+              current: nutrientResponse.data.carbohydrate || 0,
+              target: prev.carbs.target,
+            },
+            protein: {
+              current: nutrientResponse.data.protein || 0,
+              target: prev.protein.target,
+            },
+            fat: {
+              current: nutrientResponse.data.fat || 0,
+              target: prev.fat.target,
+            },
+          }));
         }
       } catch (error) {
         console.error("데이터 가져오기 실패:", error);
@@ -139,21 +187,23 @@ export default function Home() {
       setUserInfo(userData);
       setUserName(userData.name);
 
-      // 영양 목표치 설정
-      setNutritionData({
-        carbs: {
-          current: Math.floor(Math.random() * userData.target.carbohydrate),
-          target: userData.target.carbohydrate,
-        },
-        protein: {
-          current: Math.floor(Math.random() * userData.target.protein),
-          target: userData.target.protein,
-        },
-        fat: {
-          current: Math.floor(Math.random() * userData.target.fat),
-          target: userData.target.fat,
-        },
-      });
+      // 영양 목표치만 설정하고 현재 섭취량은 API에서 가져옴
+      if (userData.target) {
+        setNutritionData((prev) => ({
+          carbs: {
+            current: prev.carbs.current,
+            target: userData.target.carbohydrate || 77,
+          },
+          protein: {
+            current: prev.protein.current,
+            target: userData.target.protein || 136,
+          },
+          fat: {
+            current: prev.fat.current,
+            target: userData.target.fat || 40,
+          },
+        }));
+      }
     } catch (error) {
       console.error("사용자 정보 가져오기 실패:", error);
     }
