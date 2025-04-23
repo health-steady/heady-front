@@ -36,10 +36,14 @@ export default function Profile() {
       setUserInfo(userData);
       setLocalUserInfo({
         name: userData.name,
-        gender: userData.nickname.includes("남성") ? "남성" : "여성",
-        birthdate: userData.birthdate,
-        height: userData.height,
-        weight: userData.weight,
+        gender: userData.nickname
+          ? userData.nickname.includes("남성")
+            ? "남성"
+            : "여성"
+          : "여성",
+        birthdate: userData.birthdate || "",
+        height: userData.height || 0,
+        weight: userData.weight || 0,
       });
     } catch (error) {
       console.error("사용자 정보 가져오기 실패:", error);
@@ -219,6 +223,29 @@ export default function Profile() {
                     </button>
                   </div>
                 </div>
+
+                <div className="flex justify-between items-center border-b pb-2">
+                  <span className="text-base">일일 칼로리 목표</span>
+                  <div className="flex items-center">
+                    <span className="text-base font-medium">2000 kcal</span>
+                    <button className="ml-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-gray-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -324,7 +351,13 @@ export default function Profile() {
                   <div className="bg-green-50 p-3 rounded-lg">
                     <p className="text-xs text-gray-500">칼로리</p>
                     <p className="font-medium">
-                      {userInfo.target.calories} kcal
+                      {/* 칼로리 계산: 탄수화물 4kcal + 단백질 4kcal + 지방 9kcal */}
+                      {Math.round(
+                        userInfo.target.carbohydrate * 4 +
+                          userInfo.target.protein * 4 +
+                          userInfo.target.fat * 9
+                      )}{" "}
+                      kcal
                     </p>
                   </div>
                 </div>
