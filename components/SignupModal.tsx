@@ -163,8 +163,7 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
         password: formData.step3.password,
         name: formData.step1.name,
         birthdate: formData.step1.birthdate,
-        gender: formData.step1.gender === "남성" ? "MALE" : "FEMALE",
-        phone: `${formData.step2.phone.first}${formData.step2.phone.middle}${formData.step2.phone.last}`,
+        // 실제 서버 API 파라미터에 맞게 필드 조정
       };
 
       await authService.register(registerData);

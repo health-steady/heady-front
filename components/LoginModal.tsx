@@ -32,11 +32,20 @@ const LoginModal: React.FC<LoginModalProps> = ({
     setError("");
 
     try {
-      const response = await authService.login({ email, password });
-      localStorage.setItem("accessToken", response.accessToken);
+      const accessToken = await authService.login(email, password);
+      // localStorage.setItem은 login 함수 내부에서 이미 처리됨
 
-      onLogin(email, password);
+      // 로그인 성공 시 모달 닫기
       onClose();
+
+      // 로그인 성공 이벤트를 상위 컴포넌트에 전달
+      onLogin(email, password);
+
+      // 로그인 성공 메시지 표시
+      toast.success("로그인에 성공했습니다.", {
+        duration: 2000,
+        position: "top-center",
+      });
     } catch (error) {
       console.error("로그인 실패:", error);
       setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");

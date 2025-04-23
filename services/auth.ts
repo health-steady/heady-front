@@ -1,73 +1,110 @@
-import axios from "axios";
 import api from "./api";
+import { API_ENDPOINTS } from "../config/apiConfig";
+import { toast } from "react-hot-toast";
 
-const API_URL = "http://localhost:8080/api";
-
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-export interface LoginRequest {
+export interface UserInfo {
+  id: number;
   email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  email: string;
-  password: string;
   name: string;
-  birthdate: string;
-  gender: string;
-  phone?: string;
-}
-
-export interface LoginResponse {
-  accessToken: string;
+  nickname: string | null;
+  birthdate: string | null;
+  height: number | null;
+  weight: number | null;
+  profileImageUrl: string | null;
+  target: {
+    fastingBloodSugar: number;
+    postprandialBloodSugar: number;
+    carbohydrate: number;
+    protein: number;
+    fat: number;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Target {
-  id: number;
   fastingBloodSugar: number;
   postprandialBloodSugar: number;
   carbohydrate: number;
   protein: number;
   fat: number;
-  calories: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface UserInfo {
-  id: number;
-  target: Target;
-  email: string;
-  name: string;
-  nickname: string;
-  birthdate: string;
-  height: number;
-  weight: number;
-  profileImageUrl: string | null;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export const authService = {
-  login: async (data: LoginRequest) => {
-    const response = await api.post<LoginResponse>("/auth/v1/login", data);
-    return response.data;
+  login: async (email: string, password: string): Promise<string> => {
+    try {
+      const response = await api.post(API_ENDPOINTS.LOGIN, {
+        email,
+        password,
+      });
+
+      const { accessToken } = response.data;
+
+      // 로컬 스토리지에 토큰 저장
+      if (typeof window !== "undefined") {
+        localStorage.setItem("accessToken", accessToken);
+      }
+
+      return accessToken;
+    } catch (error) {
+      console.error("로그인 실패:", error);
+      throw error;
+    }
   },
 
-  register: async (data: RegisterRequest) => {
-    const response = await api.post("/members/v1", data);
-    return response.data;
+  register: async (userData: {
+    email: string;
+    password: string;
+    name: string;
+    birthdate?: string;
+    height?: number;
+    weight?: number;
+  }): Promise<string> => {
+    try {
+      const response = await api.post(API_ENDPOINTS.REGISTER, userData);
+      const { accessToken } = response.data;
+
+      // 로컬 스토리지에 토큰 저장
+      if (typeof window !== "undefined") {
+        localStorage.setItem("accessToken", accessToken);
+      }
+
+      return accessToken;
+    } catch (error) {
+      console.error("회원가입 실패:", error);
+      throw error;
+    }
   },
 
   getUserInfo: async (): Promise<UserInfo> => {
-    const response = await api.get<UserInfo>("/members/v1");
-    return response.data;
+    try {
+      const response = await api.get(API_ENDPOINTS.USER_INFO);
+      return response.data;
+    } catch (error) {
+      console.error("사용자 정보 가져오기 실패:", error);
+      throw error;
+    }
+  },
+
+  logout: (): void => {
+    // 로컬 스토리지에서 토큰 제거
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+
+      toast.success("로그아웃 되었습니다.", {
+        duration: 2000,
+        position: "top-center",
+      });
+    }
+  },
+
+  isLoggedIn: (): boolean => {
+    // 브라우저 환경에서만 실행
+    if (typeof window !== "undefined") {
+      return !!localStorage.getItem("accessToken");
+    }
+    return false;
   },
 };
+
+export default authService;
