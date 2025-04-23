@@ -239,26 +239,19 @@ export default function Home() {
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      const response = await authService.login({ email, password });
-      localStorage.setItem("accessToken", response.accessToken);
+      const accessToken = await authService.login(email, password);
+      // localStorage 처리는 authService.login 내부에서 이미 처리됨
       setIsLoggedIn(true);
       await fetchUserInfo();
-      handleCloseLoginModal();
-      toast.success("로그인에 성공했습니다.", {
-        duration: 3000,
+      handleCloseLoginModal(); // 로그인 모달 닫기
+      toast.success("로그인 성공!", {
+        duration: 2000,
         position: "top-center",
-        style: {
-          background: "#4CAF50",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
       });
     } catch (error) {
       console.error("로그인 실패:", error);
       toast.error("로그인에 실패했습니다.", {
-        duration: 3000,
+        duration: 2000,
         position: "top-center",
       });
     }
