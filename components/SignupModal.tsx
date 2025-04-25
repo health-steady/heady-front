@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 interface SignupModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSignupSuccess?: (email: string, password: string) => void;
 }
 
 export interface SignupStep1Data {
@@ -37,7 +38,11 @@ export interface SignupData {
   step3: SignupStep3Data;
 }
 
-const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
+const SignupModal: React.FC<SignupModalProps> = ({
+  isOpen,
+  onClose,
+  onSignupSuccess,
+}) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<SignupData>({
     step1: {
@@ -158,14 +163,18 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
     }
 
     try {
+      const email = `${formData.step2.email.id}@${formData.step2.email.domain}`;
+      const password = formData.step3.password;
+
       const registerData = {
-        email: `${formData.step2.email.id}@${formData.step2.email.domain}`,
-        password: formData.step3.password,
+        email: email,
+        password: password,
         name: formData.step1.name,
         birthdate: formData.step1.birthdate,
-        // 실제 서버 API 파라미터에 맞게 필드 조정
+        gender: formData.step1.gender,
       };
 
+      console.log("회원가입 요청 데이터:", registerData);
       await authService.register(registerData);
 
       // 성공 알림 표시
@@ -186,11 +195,18 @@ const SignupModal: React.FC<SignupModalProps> = ({ isOpen, onClose }) => {
       });
 
       onClose();
+
+      // 회원가입 성공 후 자동 로그인 처리
+      if (onSignupSuccess) {
+        onSignupSuccess(email, password);
+      }
     } catch (error: any) {
       console.error("회원가입 실패:", error);
       setError(
-        error.response?.data ||
-          "회원가입 중 오류가 발생했습니다. 다시 시도해주세요."
+        typeof error.response?.data === "object"
+          ? error.response?.data?.error || JSON.stringify(error.response?.data)
+          : error.response?.data ||
+              "회원가입 중 오류가 발생했습니다. 다시 시도해주세요."
       );
     }
   };

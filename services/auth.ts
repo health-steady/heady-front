@@ -61,6 +61,9 @@ export const authService = {
     weight?: number;
   }): Promise<string> => {
     try {
+      console.log("회원가입 요청 데이터:", userData);
+      console.log("요청 URL:", API_ENDPOINTS.REGISTER);
+
       const response = await api.post(API_ENDPOINTS.REGISTER, userData);
       const { accessToken } = response.data;
 
@@ -70,8 +73,11 @@ export const authService = {
       }
 
       return accessToken;
-    } catch (error) {
+    } catch (error: any) {
       console.error("회원가입 실패:", error);
+      console.error("상태 코드:", error.response?.status);
+      console.error("에러 메시지:", error.response?.data);
+      console.error("에러 상세:", error.message);
       throw error;
     }
   },

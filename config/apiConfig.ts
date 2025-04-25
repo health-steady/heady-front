@@ -17,7 +17,7 @@ export const API_BASE_URL = getApiBaseUrl();
 export const API_ENDPOINTS = {
   // 인증 관련
   LOGIN: "/auth/v1/login",
-  REGISTER: "/auth/v1/register",
+  REGISTER: "/members/v1",
 
   // 사용자 정보
   USER_INFO: "/members/v1",

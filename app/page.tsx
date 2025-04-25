@@ -434,6 +434,7 @@ export default function Home() {
       <SignupModal
         isOpen={isSignupModalOpen}
         onClose={handleCloseSignupModal}
+        onSignupSuccess={handleLogin}
       />
     </div>
   );
