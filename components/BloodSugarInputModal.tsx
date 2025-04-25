@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { bloodSugarService } from "../services/bloodSugar";
-import toast from "react-hot-toast";
 
 interface BloodSugarInputModalProps {
   isOpen: boolean;
@@ -107,25 +106,6 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
       onClose();
     } catch (error: any) {
       console.error("혈당 기록 저장 실패:", error);
-
-      // 401 에러가 아닌 경우에만 실패 알림 표시
-      if (error.response?.status !== 401) {
-        toast.error("혈당 기록에 실패했습니다. 다시 시도해주세요.", {
-          duration: 3000,
-          position: "top-center",
-          style: {
-            background: "#f44336",
-            color: "#fff",
-            padding: "16px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          },
-          iconTheme: {
-            primary: "#fff",
-            secondary: "#f44336",
-          },
-        });
-      }
     }
   };
 

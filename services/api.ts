@@ -1,6 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { API_BASE_URL } from "../config/apiConfig";
-import toast from "react-hot-toast";
 
 // axios 인스턴스 생성
 const apiClient = axios.create({

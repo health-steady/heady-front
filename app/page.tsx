@@ -10,7 +10,6 @@ import BloodSugarInputModal from "@/components/BloodSugarInputModal";
 import LoginModal from "@/components/LoginModal";
 import SignupModal, { SignupData } from "@/components/SignupModal";
 import MealInputModal from "@/components/MealInputModal";
-import { toast } from "react-hot-toast";
 import { authService, UserInfo } from "@/services/auth";
 import axios from "axios";
 
@@ -244,16 +243,19 @@ export default function Home() {
       setIsLoggedIn(true);
       await fetchUserInfo();
       handleCloseLoginModal(); // 로그인 모달 닫기
-      toast.success("로그인 성공!", {
-        duration: 2000,
-        position: "top-center",
-      });
     } catch (error) {
       console.error("로그인 실패:", error);
-      toast.error("로그인에 실패했습니다.", {
-        duration: 2000,
-        position: "top-center",
-      });
+    }
+  };
+
+  // 회원가입 후 자동 로그인 처리를 위한 함수 (알림 없음)
+  const handleSilentLogin = async (email: string, password: string) => {
+    try {
+      const accessToken = await authService.login(email, password);
+      setIsLoggedIn(true);
+      await fetchUserInfo();
+    } catch (error) {
+      console.error("자동 로그인 실패:", error);
     }
   };
 
@@ -297,21 +299,6 @@ export default function Home() {
 
   const handleBloodSugarSubmit = async (data: any) => {
     try {
-      toast.success("혈당 기록이 완료되었습니다.", {
-        duration: 3000,
-        position: "top-center",
-        style: {
-          background: "#4CAF50",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
-        iconTheme: {
-          primary: "#fff",
-          secondary: "#4CAF50",
-        },
-      });
       handleCloseBloodSugarModal();
     } catch (error) {
       console.error("혈당 기록 실패:", error);
@@ -320,21 +307,6 @@ export default function Home() {
 
   const handleMealSubmit = async (data: any) => {
     try {
-      toast.success("식사 기록이 완료되었습니다.", {
-        duration: 3000,
-        position: "top-center",
-        style: {
-          background: "#4CAF50",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
-        iconTheme: {
-          primary: "#fff",
-          secondary: "#4CAF50",
-        },
-      });
       handleCloseMealModal();
     } catch (error) {
       console.error("식사 기록 실패:", error);
@@ -434,7 +406,7 @@ export default function Home() {
       <SignupModal
         isOpen={isSignupModalOpen}
         onClose={handleCloseSignupModal}
-        onSignupSuccess={handleLogin}
+        onSignupSuccess={handleSilentLogin}
       />
     </div>
   );

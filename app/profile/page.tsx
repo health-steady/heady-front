@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
 import BottomNavigation from "@/components/BottomNavigation";
 import { authService, UserInfo, Target } from "@/services/auth";
 
@@ -22,7 +21,6 @@ export default function Profile() {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       router.push("/");
-      toast.error("로그인이 필요합니다.");
       return;
     }
 
@@ -47,7 +45,6 @@ export default function Profile() {
       });
     } catch (error) {
       console.error("사용자 정보 가져오기 실패:", error);
-      toast.error("사용자 정보를 불러오는데 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +53,6 @@ export default function Profile() {
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     router.push("/");
-    toast.success("로그아웃 되었습니다.");
   };
 
   // BMI 계산

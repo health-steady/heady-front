@@ -1,6 +1,5 @@
 import api from "./api";
 import { API_ENDPOINTS } from "../config/apiConfig";
-import { toast } from "react-hot-toast";
 
 export interface UserInfo {
   id: number;
@@ -96,11 +95,6 @@ export const authService = {
     // 로컬 스토리지에서 토큰 제거
     if (typeof window !== "undefined") {
       localStorage.removeItem("accessToken");
-
-      toast.success("로그아웃 되었습니다.", {
-        duration: 2000,
-        position: "top-center",
-      });
     }
   },
 

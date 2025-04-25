@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { authService } from "../services/auth";
-import toast from "react-hot-toast";
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -176,23 +175,6 @@ const SignupModal: React.FC<SignupModalProps> = ({
 
       console.log("회원가입 요청 데이터:", registerData);
       await authService.register(registerData);
-
-      // 성공 알림 표시
-      toast.success("회원가입이 완료되었습니다!", {
-        duration: 3000,
-        position: "top-center",
-        style: {
-          background: "#4CAF50",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
-        iconTheme: {
-          primary: "#fff",
-          secondary: "#4CAF50",
-        },
-      });
 
       onClose();
 

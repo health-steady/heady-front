@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
 import { bloodSugarService } from "@/services/bloodSugar";
 import { mealService } from "@/services/meal";
 import BloodSugarInputModal from "@/components/BloodSugarInputModal";
@@ -50,7 +49,6 @@ export default function Calendar() {
       console.log("혈당 기록 조회 성공:", records, "날짜:", formattedDate);
     } catch (error) {
       console.error("혈당 기록 조회 실패:", error);
-      toast.error("혈당 기록을 불러오는데 실패했습니다.");
     }
   };
 
@@ -101,21 +99,6 @@ export default function Calendar() {
   const handleBloodSugarSubmit = async (data: any) => {
     try {
       await fetchBloodSugarRecords(selectedDate);
-      toast.success("혈당 기록이 완료되었습니다.", {
-        duration: 3000,
-        position: "top-center",
-        style: {
-          background: "#4CAF50",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
-        iconTheme: {
-          primary: "#fff",
-          secondary: "#4CAF50",
-        },
-      });
       handleCloseBloodSugarModal();
     } catch (error) {
       console.error("혈당 기록 갱신 실패:", error);
@@ -125,21 +108,6 @@ export default function Calendar() {
   const handleMealSubmit = async (data: any) => {
     try {
       await fetchBloodSugarRecords(selectedDate);
-      toast.success("식사 기록이 완료되었습니다.", {
-        duration: 3000,
-        position: "top-center",
-        style: {
-          background: "#4CAF50",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
-        iconTheme: {
-          primary: "#fff",
-          secondary: "#4CAF50",
-        },
-      });
       handleCloseMealModal();
     } catch (error) {
       console.error("식사 기록 갱신 실패:", error);

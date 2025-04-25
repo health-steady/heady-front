@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { authService } from "../services/auth";
-import toast from "react-hot-toast";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -40,32 +39,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
       // 로그인 성공 이벤트를 상위 컴포넌트에 전달
       onLogin(email, password);
-
-      // 로그인 성공 메시지 표시
-      toast.success("로그인에 성공했습니다.", {
-        duration: 2000,
-        position: "top-center",
-      });
     } catch (error) {
       console.error("로그인 실패:", error);
       setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
-
-      // 실패 알림 표시
-      toast.error("로그인에 실패했습니다", {
-        duration: 3000,
-        position: "top-center",
-        style: {
-          background: "#f44336",
-          color: "#fff",
-          padding: "16px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        },
-        iconTheme: {
-          primary: "#fff",
-          secondary: "#f44336",
-        },
-      });
     }
   };
 

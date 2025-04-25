@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { mealService } from "../services/meal";
-import toast from "react-hot-toast";
 
 export interface MealInputData {
   mealTime: string;
@@ -92,7 +92,7 @@ export default function MealInputModal({
     e.preventDefault();
 
     if (foodList.length === 0) {
-      toast.error("최소 하나의 음식을 입력해주세요.");
+      console.error("최소 하나의 음식을 입력해주세요.");
       return;
     }
 
@@ -143,25 +143,6 @@ export default function MealInputModal({
       onSubmit(response);
     } catch (error: any) {
       console.error("식사 기록 저장 실패:", error);
-
-      // 401 에러가 아닌 경우에만 실패 알림 표시
-      if (error.response?.status !== 401) {
-        toast.error("식사 기록에 실패했습니다. 다시 시도해주세요.", {
-          duration: 3000,
-          position: "top-center",
-          style: {
-            background: "#f44336",
-            color: "#fff",
-            padding: "16px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-          },
-          iconTheme: {
-            primary: "#fff",
-            secondary: "#f44336",
-          },
-        });
-      }
     }
   };
 
