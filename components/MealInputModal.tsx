@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { mealService } from "../services/meal";
+import { mealService, FoodInfo } from "../services/meal";
 import { foodService, FoodDto } from "../services/food";
 import Pagination from "./Pagination";
 
@@ -61,6 +61,7 @@ export default function MealInputModal({
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(true);
   const [foodList, setFoodList] = useState<string[]>([]);
+  const [selectedFoods, setSelectedFoods] = useState<FoodInfo[]>([]);
   const [memo, setMemo] = useState("");
   const [searchResults, setSearchResults] = useState<FoodDto[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -70,8 +71,15 @@ export default function MealInputModal({
   useEffect(() => {
     // 모달이 열릴 때마다 초기화
     if (isOpen) {
+      // 콘솔 로그 추가
+      console.log("모달이 열렸습니다. 상태 초기화");
+
       setFoodList([]);
+      setSelectedFoods([]);
       setMemo("");
+      setSearchTerm("");
+      setSearchResults([]);
+
       // 모달이 열릴 때마다 현재 시간으로 초기화
       const refreshNow = new Date();
       const refreshHour = refreshNow.getHours() % 12 || 12;
@@ -80,6 +88,8 @@ export default function MealInputModal({
 
       setMealData({
         ...mealData,
+        food: "",
+        mealTime: "",
         date: {
           year: `${refreshNow.getFullYear()}년`,
           month: `${refreshNow.getMonth() + 1}월`,
@@ -90,6 +100,7 @@ export default function MealInputModal({
           minute: `${refreshMinute.toString().padStart(2, "0")}분`,
           period: refreshPeriod,
         },
+        memo: "",
       });
     }
   }, [isOpen]);
@@ -99,10 +110,14 @@ export default function MealInputModal({
       e.preventDefault();
     }
 
-    if (foodList.length === 0) {
+    if (foodList.length === 0 && selectedFoods.length === 0) {
       console.error("최소 하나의 음식을 입력해주세요.");
       return;
     }
+
+    console.log("===== 제출 전 데이터 확인 =====");
+    console.log("선택된 음식 상태(selectedFoods):", selectedFoods);
+    console.log("음식 리스트 상태(foodList):", foodList);
 
     try {
       // 시간 데이터 포맷팅
@@ -136,16 +151,42 @@ export default function MealInputModal({
         간식: "SNACK",
       };
 
-      const response = await mealService.createMeal({
+      // 선택된 음식(검색으로 추가한 음식) 목록 복사
+      console.log("API 요청 전 selectedFoods:", selectedFoods);
+      const allFoods = [...selectedFoods];
+
+      // foodList에 있지만 selectedFoods에 없는 항목들은 직접 입력한
+      // 음식들이므로 null 코드와 함께 추가
+      const directInputFoods: FoodInfo[] = [];
+
+      foodList.forEach((foodName) => {
+        // selectedFoods에 없는 음식만 직접 입력으로 간주
+        if (!selectedFoods.some((food) => food.name === foodName)) {
+          const directInputFood = { code: null, name: foodName };
+          directInputFoods.push(directInputFood);
+          allFoods.push(directInputFood);
+        }
+      });
+
+      console.log("직접 입력한 음식:", directInputFoods);
+      console.log("최종 API 전송 데이터(foods):", allFoods);
+
+      // API 요청 데이터 준비
+      const requestData = {
         mealType: mealTypeMap[mealData.mealTime] as
           | "BREAKFAST"
           | "LUNCH"
           | "DINNER"
           | "SNACK",
         mealDateTime: `${formattedDate} ${timeString}`,
-        foodNames: foodList,
+        foods: allFoods,
         memo: memo,
-      });
+      };
+
+      console.log("최종 API 요청 데이터:", requestData);
+
+      const response = await mealService.createMeal(requestData);
+      console.log("API 응답:", response);
 
       onClose();
       onSubmit(response);
@@ -227,7 +268,28 @@ export default function MealInputModal({
   };
 
   const handleSelectFood = (food: FoodDto) => {
-    setFoodList([...foodList, food.name]);
+    console.log("음식 선택됨:", food);
+
+    // 이미 선택된 음식인지 확인
+    const isDuplicate = foodList.includes(food.name);
+    if (isDuplicate) {
+      console.log("이미 선택된 음식입니다:", food.name);
+      return;
+    }
+
+    // foodList에 음식 이름 추가
+    const newFoodList = [...foodList, food.name];
+    setFoodList(newFoodList);
+
+    // selectedFoods 배열에 코드와 이름을 함께 추가
+    const foodInfo: FoodInfo = { code: food.code, name: food.name };
+    const newSelectedFoods = [...selectedFoods, foodInfo];
+
+    console.log("선택된 음식 추가:", foodInfo);
+    console.log("기존 selectedFoods:", selectedFoods);
+    console.log("새로운 selectedFoods:", newSelectedFoods);
+
+    setSelectedFoods(newSelectedFoods);
   };
 
   const handleChangePage = (newPage: number) => {
@@ -281,13 +343,27 @@ export default function MealInputModal({
 
   const handleAddFood = () => {
     if (mealData.food.trim()) {
-      setFoodList([...foodList, mealData.food.trim()]);
+      const foodName = mealData.food.trim();
+      setFoodList([...foodList, foodName]);
+      // 직접 입력한 음식은 selectedFoods에 추가하지 않고
+      // 나중에 handleSubmit에서 null 코드와 함께 추가됨
       setMealData((prev) => ({ ...prev, food: "" }));
     }
   };
 
   const handleRemoveFood = (index: number) => {
-    setFoodList(foodList.filter((_, i) => i !== index));
+    // 제거할 음식 이름 가져오기
+    const foodNameToRemove = foodList[index];
+
+    // 음식 리스트에서 제거
+    const newFoodList = foodList.filter((_, i) => i !== index);
+    setFoodList(newFoodList);
+
+    // 선택된 음식 목록에서 해당 이름의 음식 제거
+    const newSelectedFoods = selectedFoods.filter(
+      (food) => food.name !== foodNameToRemove
+    );
+    setSelectedFoods(newSelectedFoods);
   };
 
   const handleSearchInputKeyDown = (

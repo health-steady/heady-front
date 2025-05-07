@@ -1,10 +1,17 @@
 import api from "./api";
 import { API_ENDPOINTS } from "../config/apiConfig";
 
+// 음식 정보를 위한 인터페이스 추가
+export interface FoodInfo {
+  code: string | null;
+  name: string;
+}
+
 export interface MealRequest {
   mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
   mealDateTime: string;
-  foodNames: string[];
+  // foods 배열만 사용
+  foods: FoodInfo[];
   memo: string;
 }
 
