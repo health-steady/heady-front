@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { mealService } from "../services/meal";
+import { foodService, FoodDto } from "../services/food";
+import Pagination from "./Pagination";
 
 export interface MealInputData {
   mealTime: string;
@@ -60,6 +62,10 @@ export default function MealInputModal({
   const [isSearchMode, setIsSearchMode] = useState(true);
   const [foodList, setFoodList] = useState<string[]>([]);
   const [memo, setMemo] = useState("");
+  const [searchResults, setSearchResults] = useState<FoodDto[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchPage, setSearchPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     // 모달이 열릴 때마다 초기화
@@ -88,8 +94,10 @@ export default function MealInputModal({
     }
   }, [isOpen]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
 
     if (foodList.length === 0) {
       console.error("최소 하나의 음식을 입력해주세요.");
@@ -170,15 +178,105 @@ export default function MealInputModal({
     }));
   };
 
-  const handleFoodSearch = (e: React.FormEvent) => {
+  const handleFoodSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 실제 검색 로직은 여기에 구현
-    console.log("검색어:", searchTerm);
-    // 검색 결과를 food에 설정하는 예시
-    setMealData((prev) => ({
-      ...prev,
-      food: searchTerm,
-    }));
+    if (!searchTerm.trim()) return;
+
+    try {
+      setIsSearching(true);
+      // 검색 시 페이지 번호를 1로 리셋
+      setSearchPage(1);
+      const result = await foodService.searchFoods({
+        keyword: searchTerm,
+        pageNo: 1, // 항상 첫 페이지부터 검색
+        pageSize: 10,
+      });
+
+      console.log("Search results:", result);
+
+      if (result) {
+        // content 배열 처리
+        if (result.content && Array.isArray(result.content)) {
+          setSearchResults(result.content);
+        } else {
+          setSearchResults([]);
+        }
+
+        // page 객체에서 totalPages 가져오기
+        if (result.page) {
+          setTotalPages(result.page.totalPages || 1);
+          // API는 0-indexed 페이지 번호를 사용하므로 1을 더해줍니다
+          setSearchPage((result.page.number || 0) + 1);
+        } else if (typeof result.totalPages === "number") {
+          // 기존 구조도 지원
+          setTotalPages(result.totalPages);
+        } else {
+          setTotalPages(1);
+        }
+      } else {
+        setSearchResults([]);
+        setTotalPages(1);
+      }
+    } catch (error) {
+      console.error("음식 검색 실패:", error);
+      setSearchResults([]);
+      setTotalPages(1);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSelectFood = (food: FoodDto) => {
+    setFoodList([...foodList, food.name]);
+  };
+
+  const handleChangePage = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setSearchPage(newPage);
+
+    // 페이지가 변경되면 해당 페이지의 결과를 가져옴
+    setIsSearching(true);
+    foodService
+      .searchFoods({
+        keyword: searchTerm,
+        pageNo: newPage, // 페이지 번호는 API에서 1부터 시작하므로 그대로 사용
+        pageSize: 10,
+      })
+      .then((result) => {
+        console.log("Page change results:", result);
+
+        if (result) {
+          // content 배열 처리
+          if (result.content && Array.isArray(result.content)) {
+            setSearchResults(result.content);
+          } else {
+            setSearchResults([]);
+          }
+
+          // page 객체에서 totalPages 가져오기
+          if (result.page) {
+            setTotalPages(result.page.totalPages || 1);
+            // API는 0-indexed 페이지 번호를 사용하므로 1을 더해줍니다
+            setSearchPage((result.page.number || 0) + 1);
+          } else if (typeof result.totalPages === "number") {
+            // 기존 구조도 지원
+            setTotalPages(result.totalPages);
+          } else {
+            setTotalPages(1);
+          }
+        } else {
+          setSearchResults([]);
+          setTotalPages(1);
+        }
+      })
+      .catch((error) => {
+        console.error("페이지 변경 중 오류:", error);
+        setSearchResults([]);
+        setTotalPages(1);
+      })
+      .finally(() => {
+        setIsSearching(false);
+      });
   };
 
   const handleAddFood = () => {
@@ -192,6 +290,58 @@ export default function MealInputModal({
     setFoodList(foodList.filter((_, i) => i !== index));
   };
 
+  const handleSearchInputKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleFoodSearch(e as any);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    console.log(
+      "Rendering page numbers. Current page:",
+      searchPage,
+      "Total pages:",
+      totalPages
+    );
+
+    const pageNumbers: JSX.Element[] = [];
+    const maxPageButtons = 5; // 한 번에 표시할 최대 페이지 버튼 수
+
+    if (totalPages <= 1) return pageNumbers;
+
+    let startPage = Math.max(1, searchPage - Math.floor(maxPageButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+    // 시작 페이지가 조정된 경우, 종료 페이지도 다시 계산
+    if (endPage - startPage + 1 < maxPageButtons && endPage < totalPages) {
+      startPage = Math.max(1, endPage - maxPageButtons + 1);
+    }
+
+    console.log("Rendering pages from", startPage, "to", endPage);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(
+        <button
+          key={i}
+          type="button"
+          onClick={() => handleChangePage(i)}
+          className={`w-7 h-7 flex items-center justify-center text-xs rounded mx-0.5 font-medium ${
+            searchPage === i
+              ? "bg-blue-500 text-white"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+
+    return pageNumbers;
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -200,13 +350,15 @@ export default function MealInputModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg w-full max-w-md mx-4 overflow-hidden"
+        className="bg-white rounded-lg w-full max-w-md mx-4 max-h-[90vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6">
-          <h2 className="font-bold text-2xl mb-6">식사 기록하기</h2>
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="font-bold text-xl">식사 기록하기</h2>
+        </div>
 
-          <form onSubmit={handleSubmit}>
+        <div className="p-4 overflow-y-auto flex-grow">
+          <form id="mealForm" onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 식사 시간
@@ -334,12 +486,13 @@ export default function MealInputModal({
               </div>
 
               {isSearchMode ? (
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <div className="flex">
                     <input
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={handleSearchInputKeyDown}
                       placeholder="음식명을 입력하세요"
                       className="flex-grow border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
@@ -364,9 +517,89 @@ export default function MealInputModal({
                       </svg>
                     </button>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    * 검색 결과는 바로 아래에 표시됩니다
-                  </div>
+
+                  {isSearching ? (
+                    <div className="text-center py-4">
+                      <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+                      <p className="mt-2 text-sm text-gray-600">검색 중...</p>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="max-h-48 overflow-y-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50 sticky top-0">
+                            <tr>
+                              <th className="px-3 py-2 text-xs text-gray-500">
+                                식품명
+                              </th>
+                              <th className="px-3 py-2 text-xs text-gray-500">
+                                제조사
+                              </th>
+                              <th className="px-3 py-2 text-xs text-gray-500"></th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {searchResults.map((food) => (
+                              <tr key={food.code} className="hover:bg-gray-50">
+                                <td className="px-3 py-2 text-sm">
+                                  {food.name}
+                                </td>
+                                <td className="px-3 py-2 text-xs text-gray-500">
+                                  {food.manufacturerName}
+                                </td>
+                                <td className="px-3 py-2 text-right">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSelectFood(food)}
+                                    className="text-xs text-blue-500 hover:text-blue-700"
+                                  >
+                                    추가
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {totalPages > 1 && (
+                        <Pagination
+                          currentPage={searchPage}
+                          totalPages={totalPages}
+                          onPageChange={handleChangePage}
+                        />
+                      )}
+                    </div>
+                  ) : searchTerm && !isSearching ? (
+                    <div className="text-center py-4 text-gray-500 text-sm">
+                      검색 결과가 없습니다
+                    </div>
+                  ) : null}
+
+                  {foodList.length > 0 && (
+                    <div className="mt-4">
+                      <div className="text-sm font-medium text-gray-700 mb-2">
+                        추가된 음식
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {foodList.map((food, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg"
+                          >
+                            <span>{food}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveFood(index)}
+                              className="text-gray-500 hover:text-gray-700"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -429,23 +662,26 @@ export default function MealInputModal({
                 rows={3}
               />
             </div>
-
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                취소
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
-              >
-                기록하기
-              </button>
-            </div>
           </form>
+        </div>
+
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-gray-600 hover:text-gray-800"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
+            >
+              기록하기
+            </button>
+          </div>
         </div>
       </div>
     </div>

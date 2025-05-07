@@ -8,7 +8,7 @@ const getApiBaseUrl = () => {
   }
 
   // 개발 환경에서는 기본값 사용
-  return "http://localhost:8080/api";
+  return "http://localhost:8080";
 };
 
 export const API_BASE_URL = getApiBaseUrl();
@@ -16,20 +16,20 @@ export const API_BASE_URL = getApiBaseUrl();
 // API 엔드포인트
 export const API_ENDPOINTS = {
   // 인증 관련
-  LOGIN: "/auth/v1/login",
-  REGISTER: "/members/v1",
+  LOGIN: "/api/auth/v1/login",
+  REGISTER: "/api/members/v1",
 
   // 사용자 정보
-  USER_INFO: "/members/v1",
+  USER_INFO: "/api/members/v1",
 
   // 혈당 관련
-  BLOOD_SUGAR_SUMMARY: "/bloodSugars/v1/summary",
-  BLOOD_SUGAR_RECORD: "/bloodSugars/v1/record",
+  BLOOD_SUGAR_SUMMARY: "/api/bloodSugars/v1/summary",
+  BLOOD_SUGAR_RECORD: "/api/bloodSugars/v1/record",
 
   // 식사 관련
-  NUTRIENTS_SUMMARY: "/meals/v1/nutrients/summary",
-  FOOD_SEARCH: "/meals/v1/foods/search",
-  MEAL_RECORD: "/meals/v1/record",
+  NUTRIENTS_SUMMARY: "/api/meals/v1/nutrients/summary",
+  FOOD_SEARCH: "/api/foods/v1/search",
+  MEAL_RECORD: "/api/meals/v1/record",
 };
 
 export default {

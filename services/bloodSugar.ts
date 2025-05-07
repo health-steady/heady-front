@@ -1,4 +1,5 @@
 import api from "./api";
+import { API_ENDPOINTS } from "../config/apiConfig";
 
 export interface BloodSugarRequest {
   measuredAt: string;
@@ -31,16 +32,19 @@ export interface BloodSugarResponse {
 export const bloodSugarService = {
   record: async (data: BloodSugarRequest) => {
     const response = await api.post<BloodSugarResponse>(
-      "/bloodSugars/v1",
+      "/api/bloodSugars/v1",
       data
     );
     return response.data;
   },
 
   getAllByDate: async (date: string) => {
-    const response = await api.get<BloodSugarResponse[]>("/bloodSugars/v1", {
-      params: { date },
-    });
+    const response = await api.get<BloodSugarResponse[]>(
+      "/api/bloodSugars/v1",
+      {
+        params: { date },
+      }
+    );
     return response.data;
   },
 };

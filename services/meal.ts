@@ -1,4 +1,5 @@
 import api from "./api";
+import { API_ENDPOINTS } from "../config/apiConfig";
 
 export interface MealRequest {
   mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
@@ -17,7 +18,7 @@ export interface MealResponse {
 
 export const mealService = {
   createMeal: async (data: MealRequest) => {
-    const response = await api.post<MealResponse>("/meals/v1", data);
+    const response = await api.post<MealResponse>("/api/meals/v1", data);
     return response.data;
   },
 };
