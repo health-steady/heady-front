@@ -1,5 +1,7 @@
 import React from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 interface HeaderProps {
   userName: string;
@@ -12,12 +14,38 @@ export default function Header({
   onProfileClick,
   profileImageUrl,
 }: HeaderProps) {
+  const router = useRouter();
+
+  const handleNotificationClick = () => {
+    Swal.fire({
+      title: "알림",
+      text: "준비중인 서비스입니다",
+      icon: "info",
+      confirmButtonText: "확인",
+      confirmButtonColor: "#3085d6",
+      customClass: {
+        popup: "swal2-popup",
+        title: "swal2-title",
+        htmlContainer: "swal2-html-container",
+        confirmButton: "swal2-confirm-button",
+      },
+    });
+  };
+
+  const handleProfileClick = () => {
+    if (userName) {
+      router.replace("/profile");
+    } else {
+      onProfileClick();
+    }
+  };
+
   return (
     <div className="flex justify-between items-center p-3 py-4 sm:p-4 sm:py-5 md:p-5 md:py-6 border-b border-gray-200">
       <div className="flex items-center">
         <div
           className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-blue-100 overflow-hidden mr-3 flex-shrink-0 border-2 border-blue-300 cursor-pointer transition-all duration-300 hover:scale-105 hover:border-blue-400"
-          onClick={onProfileClick}
+          onClick={handleProfileClick}
         >
           <img
             src={profileImageUrl || "/default-profile.png"}
@@ -41,7 +69,7 @@ export default function Header({
       <div className="relative">
         <div
           className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 flex items-center justify-center transition-all duration-300 hover:scale-110 cursor-pointer"
-          onClick={onProfileClick}
+          onClick={handleNotificationClick}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

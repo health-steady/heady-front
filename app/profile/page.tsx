@@ -96,8 +96,8 @@ export default function Profile() {
             </button>
           </div>
         </div>
-        <div className="h-full overflow-y-auto pt-[85px]">
-          <div className="bg-white h-full">
+        <div className="h-full overflow-y-auto pt-[85px] pb-28">
+          <div className="bg-white min-h-full">
             <div className="h-3 sm:h-4 md:h-5 bg-gray-100"></div>
 
             {/* 프로필 정보 */}
