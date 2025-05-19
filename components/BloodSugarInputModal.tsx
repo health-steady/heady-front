@@ -11,7 +11,12 @@ interface BloodSugarInputModalProps {
 
 interface BloodSugarData {
   measuredAt: string;
-  measureType: "BEFORE_MEAL" | "AFTER_MEAL" | "BEFORE_SLEEP" | "RANDOM";
+  measureType:
+    | "BEFORE_MEAL"
+    | "AFTER_MEAL"
+    | "BEFORE_SLEEP"
+    | "RANDOM"
+    | "FASTING";
   mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
   level: number;
   memo: string;
@@ -28,7 +33,12 @@ interface BloodSugarInputData {
     minute: string;
     period: "오전" | "오후";
   };
-  measureType: "BEFORE_MEAL" | "AFTER_MEAL" | "BEFORE_SLEEP" | "RANDOM";
+  measureType:
+    | "BEFORE_MEAL"
+    | "AFTER_MEAL"
+    | "BEFORE_SLEEP"
+    | "RANDOM"
+    | "FASTING";
   mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
   level: string;
   memo: string;
@@ -90,7 +100,8 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
           | "BEFORE_MEAL"
           | "AFTER_MEAL"
           | "BEFORE_SLEEP"
-          | "RANDOM",
+          | "RANDOM"
+          | "FASTING",
         mealType: formData.mealType as
           | "BREAKFAST"
           | "LUNCH"
@@ -148,6 +159,7 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
                 <option value="BEFORE_MEAL">식사 전</option>
                 <option value="AFTER_MEAL">식사 후</option>
                 <option value="BEFORE_SLEEP">취침 전</option>
+                <option value="FASTING">공복</option>
                 <option value="RANDOM">임의</option>
               </select>
             </div>
