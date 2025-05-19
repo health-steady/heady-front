@@ -157,6 +157,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 type="button"
                 className="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center font-medium"
               >
+                <div className="w-6 h-6 mr-2 bg-[#FEE500] flex items-center justify-center text-black font-bold rounded-sm">
+                  K
+                </div>
+                카카오 로그인
+              </button>
+
+              <button
+                type="button"
+                className="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center font-medium"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 48 48"
@@ -182,16 +192,6 @@ const LoginModal: React.FC<LoginModalProps> = ({
                   />
                 </svg>
                 Continue with Google
-              </button>
-
-              <button
-                type="button"
-                className="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center font-medium"
-              >
-                <div className="w-6 h-6 mr-2 bg-[#03C75A] flex items-center justify-center text-white font-bold rounded-sm">
-                  N
-                </div>
-                네이버 로그인
               </button>
             </div>
           </form>
