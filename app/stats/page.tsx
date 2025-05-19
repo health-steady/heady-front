@@ -216,28 +216,6 @@ export default function Stats() {
           <div className="bg-white h-full">
             <div className="h-3 sm:h-4 md:h-5 bg-gray-100"></div>
 
-            {/* AI 분석 버튼 */}
-            <div className="p-4 bg-white rounded-lg shadow-sm mb-2">
-              <button
-                onClick={goToAIAnalysis}
-                className="w-full py-3 bg-blue-500 text-white rounded-lg font-medium flex items-center justify-center hover:bg-blue-600 transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                AI 분석
-              </button>
-            </div>
-
             {/* 혈당 그래프 */}
             <div className="p-4 bg-white rounded-lg shadow-sm mb-2">
               <div className="flex justify-between items-center mb-4">
@@ -459,6 +437,31 @@ export default function Stats() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* AI 분석 버튼 - 통계 섹션 아래로 이동 */}
+            <div className="p-4 bg-white rounded-lg shadow-sm mt-2">
+              <button
+                onClick={() => {
+                  // 새 창에서 결과가 나타나도록 수정
+                  window.open("/health-analysis", "_blank");
+                }}
+                className="w-full py-3 bg-blue-500 text-white rounded-lg font-medium flex items-center justify-center hover:bg-blue-600 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                AI 분석
+              </button>
             </div>
           </div>
         </div>
