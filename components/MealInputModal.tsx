@@ -570,12 +570,12 @@ export default function MealInputModal({
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onKeyDown={handleSearchInputKeyDown}
                       placeholder="음식명을 입력하세요"
-                      className="flex-grow border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="flex-grow border border-gray-300 rounded-l-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                     />
                     <button
                       type="button"
                       onClick={handleFoodSearch}
-                      className="bg-gray-100 border border-gray-300 border-l-0 rounded-r-lg px-4 hover:bg-gray-200"
+                      className="bg-gray-100 border border-gray-300 border-l-0 rounded-r-lg px-4 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-inset"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -616,7 +616,15 @@ export default function MealInputModal({
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
                             {searchResults.map((food) => (
-                              <tr key={food.code} className="hover:bg-gray-50">
+                              <tr
+                                key={food.code}
+                                className="hover:bg-gray-50 cursor-pointer"
+                                onClick={() => {
+                                  handleSelectFood(food);
+                                  setSearchResults([]); // 검색 결과 초기화
+                                  setSearchTerm(""); // 검색어 초기화
+                                }}
+                              >
                                 <td className="px-3 py-2 text-sm">
                                   {food.name}
                                 </td>
@@ -624,13 +632,9 @@ export default function MealInputModal({
                                   {food.manufacturerName}
                                 </td>
                                 <td className="px-3 py-2 text-right">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSelectFood(food)}
-                                    className="text-xs text-blue-500 hover:text-blue-700"
-                                  >
-                                    추가
-                                  </button>
+                                  <span className="text-xs text-blue-500">
+                                    선택
+                                  </span>
                                 </td>
                               </tr>
                             ))}
