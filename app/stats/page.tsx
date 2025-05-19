@@ -35,6 +35,12 @@ const DANGER_RANGE = {
   high: 180,
 };
 
+// 차트 Y축 범위 정의
+const CHART_RANGE = {
+  min: 40, // 최소값을 40으로 설정
+  max: 250, // 최대값을 250으로 설정
+};
+
 // 혈당 상태에 따른 색상 정의
 const getBloodSugarColor = (level: number) => {
   if (level < NORMAL_RANGE.min) return "#EF4444"; // 저혈당 (빨간색)
@@ -254,13 +260,21 @@ export default function Stats() {
                         axisLine={false}
                       />
                       <YAxis
-                        domain={["dataMin - 20", "dataMax + 20"]}
+                        domain={[CHART_RANGE.min, CHART_RANGE.max]}
                         tickLine={false}
                         axisLine={false}
                         width={40}
                         tick={false}
                       />
                       <Tooltip content={<CustomTooltip />} />
+
+                      {/* 저혈당 범위 영역 */}
+                      <ReferenceArea
+                        y1={CHART_RANGE.min}
+                        y2={NORMAL_RANGE.min}
+                        fill="#EF4444"
+                        fillOpacity={0.1}
+                      />
 
                       {/* 정상 범위 영역 */}
                       <ReferenceArea
@@ -281,7 +295,7 @@ export default function Stats() {
                       {/* 심한 고혈당 범위 영역 */}
                       <ReferenceArea
                         y1={DANGER_RANGE.high}
-                        y2={DANGER_RANGE.high + 50}
+                        y2={CHART_RANGE.max}
                         fill="#EF4444"
                         fillOpacity={0.1}
                       />
