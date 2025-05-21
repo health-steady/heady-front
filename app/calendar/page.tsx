@@ -14,6 +14,8 @@ export default function Calendar() {
   const now = new Date();
   const [currentDate, setCurrentDate] = useState(now);
   const [selectedDate, setSelectedDate] = useState<Date>(now);
+  const [selectedRecord, setSelectedRecord] =
+    useState<BloodSugarResponse | null>(null);
 
   // 혈당 기록 데이터
   const [bloodSugarRecords, setBloodSugarRecords] = useState<
@@ -174,8 +176,45 @@ export default function Calendar() {
     }
   }
 
+  const handleRecordClick = (record: BloodSugarResponse) => {
+    if (selectedRecord?.id === record.id) {
+      setSelectedRecord(null);
+    } else {
+      setSelectedRecord(record);
+    }
+  };
+
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setSelectedRecord(null);
+    }
+  };
+
+  const handleDeleteBloodSugar = async (recordId: number) => {
+    try {
+      await bloodSugarService.delete(recordId);
+      await fetchBloodSugarRecords(selectedDate);
+      setSelectedRecord(null);
+    } catch (error) {
+      console.error("혈당 기록 삭제 실패:", error);
+    }
+  };
+
+  const handleDeleteMeal = async (mealId: number) => {
+    try {
+      await mealService.delete(mealId);
+      await fetchBloodSugarRecords(selectedDate);
+      setSelectedRecord(null);
+    } catch (error) {
+      console.error("식사 기록 삭제 실패:", error);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center items-start pt-0">
+    <div
+      className="min-h-screen bg-gray-100 flex justify-center items-start pt-0"
+      onClick={handleBackgroundClick}
+    >
       <div className="w-full max-w-[500px] h-screen sm:h-[915px] relative bg-white overflow-hidden shadow-xl border border-gray-200">
         <div className="fixed top-0 left-0 right-0 max-w-[500px] mx-auto bg-white z-10">
           {/* 헤더 */}
@@ -337,7 +376,8 @@ export default function Calendar() {
               {bloodSugarRecords.map((record) => (
                 <div
                   key={record.id}
-                  className="bg-white rounded-lg shadow p-4 flex flex-col space-y-2"
+                  className="bg-white rounded-lg shadow p-4 flex flex-col space-y-2 cursor-pointer"
+                  onClick={() => handleRecordClick(record)}
                 >
                   <div className="flex items-center space-x-4">
                     <div className="text-2xl">
@@ -391,6 +431,34 @@ export default function Calendar() {
                         </div>
                       </div>
                     )}
+
+                  {/* 선택된 기록일 경우 삭제 버튼 표시 */}
+                  {selectedRecord?.id === record.id && (
+                    <div className="flex justify-end space-x-2 mt-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteBloodSugar(record.id);
+                        }}
+                        className="px-3 py-1 text-sm text-red-600 bg-red-50 rounded hover:bg-red-100"
+                      >
+                        혈당 기록 삭제
+                      </button>
+                      {record.meal && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (record.meal) {
+                              handleDeleteMeal(record.meal.id);
+                            }
+                          }}
+                          className="px-3 py-1 text-sm text-red-600 bg-red-50 rounded hover:bg-red-100"
+                        >
+                          식사 기록 삭제
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

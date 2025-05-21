@@ -47,4 +47,9 @@ export const bloodSugarService = {
     );
     return response.data;
   },
+
+  delete: async (id: number) => {
+    const response = await api.delete(`/api/bloodSugars/v1/${id}`);
+    return response.data;
+  },
 };

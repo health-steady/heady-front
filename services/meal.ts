@@ -28,4 +28,9 @@ export const mealService = {
     const response = await api.post<MealResponse>("/api/meals/v1", data);
     return response.data;
   },
+
+  delete: async (id: number) => {
+    const response = await api.delete(`/api/meals/v1/${id}`);
+    return response.data;
+  },
 };
