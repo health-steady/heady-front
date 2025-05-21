@@ -1,25 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { bloodSugarService } from "../services/bloodSugar";
+import { bloodSugarService, BloodSugarRequest } from "../services/bloodSugar";
 
 interface BloodSugarInputModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: any) => void;
   selectedDate: Date;
-}
-
-interface BloodSugarData {
-  measuredAt: string;
-  measureType:
-    | "BEFORE_MEAL"
-    | "AFTER_MEAL"
-    | "BEFORE_SLEEP"
-    | "RANDOM"
-    | "FASTING";
-  mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
-  level: number;
-  memo: string;
 }
 
 interface BloodSugarInputData {
@@ -33,13 +20,8 @@ interface BloodSugarInputData {
     minute: string;
     period: "오전" | "오후";
   };
-  measureType:
-    | "BEFORE_MEAL"
-    | "AFTER_MEAL"
-    | "BEFORE_SLEEP"
-    | "RANDOM"
-    | "FASTING";
-  mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
+  measureType: "BEFORE_MEAL" | "AFTER_MEAL" | "BEDTIME" | "RANDOM" | "FASTING";
+  mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK" | "NONE";
   level: string;
   memo: string;
 }
@@ -86,6 +68,16 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
     }
   }, [selectedDate]);
 
+  // measureType이 변경될 때 mealType을 적절히 설정하는 효과
+  useEffect(() => {
+    if (["BEDTIME", "RANDOM", "FASTING"].includes(formData.measureType)) {
+      setFormData((prev) => ({
+        ...prev,
+        mealType: "NONE",
+      }));
+    }
+  }, [formData.measureType]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -94,19 +86,10 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
       const formattedTime = `${formData.time.hour}:${formData.time.minute}`;
       const measuredAt = `${formattedDate} ${formattedTime}`;
 
-      const bloodSugarData: BloodSugarData = {
+      const bloodSugarData: BloodSugarRequest = {
         measuredAt: measuredAt,
-        measureType: formData.measureType as
-          | "BEFORE_MEAL"
-          | "AFTER_MEAL"
-          | "BEFORE_SLEEP"
-          | "RANDOM"
-          | "FASTING",
-        mealType: formData.mealType as
-          | "BREAKFAST"
-          | "LUNCH"
-          | "DINNER"
-          | "SNACK",
+        measureType: formData.measureType,
+        mealType: formData.mealType,
         level: parseInt(formData.level),
         memo: formData.memo,
       };
@@ -158,7 +141,7 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
               >
                 <option value="BEFORE_MEAL">식사 전</option>
                 <option value="AFTER_MEAL">식사 후</option>
-                <option value="BEFORE_SLEEP">취침 전</option>
+                <option value="BEDTIME">취침 전</option>
                 <option value="FASTING">공복</option>
                 <option value="RANDOM">임의</option>
               </select>

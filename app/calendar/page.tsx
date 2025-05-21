@@ -8,6 +8,7 @@ import { mealService } from "@/services/meal";
 import BloodSugarInputModal from "@/components/BloodSugarInputModal";
 import MealInputModal from "@/components/MealInputModal";
 import { BloodSugarResponse } from "@/services/bloodSugar";
+import { getBloodSugarTypeLabel } from "../../utils/bloodSugarUtils";
 
 export default function Calendar() {
   const now = new Date();
@@ -344,20 +345,10 @@ export default function Calendar() {
                     </div>
                     <div className="flex-1">
                       <div className="font-medium">
-                        {record.mealType === "BREAKFAST"
-                          ? "아침"
-                          : record.mealType === "LUNCH"
-                          ? "점심"
-                          : record.mealType === "DINNER"
-                          ? "저녁"
-                          : "간식"}
-                        {record.measureType === "BEFORE_MEAL"
-                          ? " 식전"
-                          : record.measureType === "AFTER_MEAL"
-                          ? " 식후"
-                          : record.measureType === "BEFORE_SLEEP"
-                          ? " 취침 전"
-                          : ""}
+                        {getBloodSugarTypeLabel(
+                          record.measureType,
+                          record.mealType
+                        )}
                       </div>
                       <div className="text-sm text-gray-500">
                         {new Date(record.measuredAt).toLocaleTimeString(

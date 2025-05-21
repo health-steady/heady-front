@@ -3,13 +3,8 @@ import { API_ENDPOINTS } from "../config/apiConfig";
 
 export interface BloodSugarRequest {
   measuredAt: string;
-  measureType:
-    | "BEFORE_MEAL"
-    | "AFTER_MEAL"
-    | "BEFORE_SLEEP"
-    | "RANDOM"
-    | "FASTING";
-  mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
+  measureType: "BEFORE_MEAL" | "AFTER_MEAL" | "BEDTIME" | "RANDOM" | "FASTING";
+  mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK" | "NONE";
   level: number;
   memo: string;
 }
@@ -17,13 +12,8 @@ export interface BloodSugarRequest {
 export interface BloodSugarResponse {
   id: number;
   measuredAt: string;
-  measureType:
-    | "BEFORE_MEAL"
-    | "AFTER_MEAL"
-    | "BEFORE_SLEEP"
-    | "RANDOM"
-    | "FASTING";
-  mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK";
+  measureType: "BEFORE_MEAL" | "AFTER_MEAL" | "BEDTIME" | "RANDOM" | "FASTING";
+  mealType: "BREAKFAST" | "LUNCH" | "DINNER" | "SNACK" | "NONE";
   level: number;
   memo: string;
   meal?: {
