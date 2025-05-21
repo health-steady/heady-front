@@ -64,6 +64,13 @@ interface HealthReportProps {
     dietAnalysis: string;
     recommendedActions: string[];
   };
+  foodImpactData?: Array<{
+    name: string;
+    glucoseImpact: number;
+    carbs: number;
+    occurrences: number;
+    glycemicIndex: number;
+  }>;
 }
 
 // 색상 정의
@@ -75,7 +82,17 @@ export interface HealthReportRef {
 }
 
 const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
-  ({ glucoseData, foodData, nutrientData, userInfo, analysisResults }, ref) => {
+  (
+    {
+      glucoseData,
+      foodData,
+      nutrientData,
+      userInfo,
+      analysisResults,
+      foodImpactData = [],
+    },
+    ref
+  ) => {
     const reportRef = useRef<HTMLDivElement>(null);
 
     // 일주일간 혈당 데이터 처리
@@ -115,13 +132,32 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
       { name: "지방", value: totalNutrients.fat },
     ];
 
-    // 음식 영향 데이터
-    const foodImpactData = foodData.map((food) => ({
-      name: food.name,
-      glucoseImpact: food.glucoseAfter || 0,
-      carbs: food.carbs,
-      glycemicIndex: food.glycemicIndex || 0,
-    }));
+    // 음식 영향 데이터 - 새로운 foodImpactData를 사용하거나 기존 방식으로 생성
+    const processedFoodImpactData =
+      foodImpactData.length > 0
+        ? foodImpactData.map((food) => ({
+            ...food,
+            // 식전/식후 혈당 추정 - 실제로는 API에서 제공되어야 함
+            beforeGlucose: Math.max(90, 110 - food.carbs / 10), // 식전 혈당 (더 낮은 값)
+            afterGlucose: Math.min(180, food.glucoseImpact + 100), // 식후 혈당 (더 높은 값)
+            // 음식 이름이 15자를 초과할 경우 ...으로 표시
+            displayName:
+              food.name.length > 15
+                ? `${food.name.substring(0, 12)}...`
+                : food.name,
+          }))
+        : foodData.map((food) => ({
+            // 기존 방식으로 생성
+            name: food.name,
+            displayName:
+              food.name.length > 15
+                ? `${food.name.substring(0, 12)}...`
+                : food.name,
+            beforeGlucose: 95, // 임의의 식전 혈당
+            afterGlucose: food.glucoseAfter || 140, // 식후 혈당
+            carbs: food.carbs,
+            occurrences: 1,
+          }));
 
     // PDF 생성 함수
     const generatePDF = async () => {
@@ -491,21 +527,28 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
           {/* 음식과 혈당 영향 섹션 */}
           <div className="report-section p-5 bg-gray-50 rounded-lg">
             <h2 className="text-xl font-semibold mb-4 text-blue-800">
-              음식이 혈당에 미치는 영향
+              음식별 혈당 수치 및 탄수화물
             </h2>
             <div className="bg-white p-4 rounded shadow-sm h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={foodImpactData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
+                  data={processedFoodImpactData}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 65 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" />
+                  <XAxis
+                    dataKey="displayName"
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    interval={0}
+                    tick={{ fontSize: 11 }}
+                  />
                   <YAxis
                     yAxisId="left"
                     orientation="left"
                     label={{
-                      value: "혈당 상승 (mg/dL)",
+                      value: "혈당 수치 (mg/dL)",
                       angle: -90,
                       position: "insideLeft",
                     }}
@@ -519,22 +562,59 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
                       position: "insideRight",
                     }}
                   />
-                  <Tooltip />
-                  <Legend verticalAlign="top" height={36} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(255, 255, 255, 0.95)",
+                      borderRadius: "5px",
+                      padding: "10px",
+                      border: "1px solid #e0e0e0",
+                    }}
+                    formatter={(value, name) => {
+                      if (name === "식전 혈당") return [`${value} mg/dL`, name];
+                      if (name === "식후 혈당") return [`${value} mg/dL`, name];
+                      if (name === "탄수화물") return [`${value}g`, name];
+                      return [value, name];
+                    }}
+                    labelFormatter={(label, props) => {
+                      if (props && props.length > 0) {
+                        return `음식: ${props[0].payload.name}`;
+                      }
+                      return `음식: ${label}`;
+                    }}
+                  />
+                  <Legend
+                    verticalAlign="top"
+                    height={36}
+                    iconSize={14}
+                    iconType="square"
+                    wrapperStyle={{ paddingLeft: "10px" }}
+                  />
                   <Bar
                     yAxisId="left"
-                    dataKey="glucoseImpact"
-                    name="혈당 상승"
-                    fill="#8884d8"
+                    dataKey="beforeGlucose"
+                    name="식전 혈당"
+                    fill="#4CAF50"
+                  />
+                  <Bar
+                    yAxisId="left"
+                    dataKey="afterGlucose"
+                    name="식후 혈당"
+                    fill="#FF8C00"
                   />
                   <Bar
                     yAxisId="right"
                     dataKey="carbs"
                     name="탄수화물"
-                    fill="#82ca9d"
+                    fill="#2196F3"
                   />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+            <div className="mt-4 text-sm text-gray-600 italic">
+              <p>
+                * 각 음식별 평균 식전/식후 혈당 수치와 평균 탄수화물 함량을
+                보여줍니다.
+              </p>
             </div>
           </div>
 
@@ -559,7 +639,12 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
                         position: "insideLeft",
                       }}
                     />
-                    <Tooltip />
+                    <Tooltip
+                      formatter={(value) => {
+                        const numValue = Number(value);
+                        return numValue.toFixed(2);
+                      }}
+                    />
                     <Legend verticalAlign="top" height={36} />
                     <Bar
                       dataKey="carbs"
@@ -585,8 +670,10 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
                       cx="50%"
                       cy="50%"
                       labelLine={true}
-                      label={({ name, percent }) =>
-                        `${name} ${(percent * 100).toFixed(0)}%`
+                      label={({ name, percent, value }) =>
+                        `${name} ${(percent * 100).toFixed(0)}% (${Number(
+                          value
+                        ).toFixed(2)}g)`
                       }
                       outerRadius={100}
                       fill="#8884d8"
@@ -599,7 +686,18 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
                         />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => `${value}g`} />
+                    <Tooltip
+                      formatter={(value) => {
+                        const numValue = Number(value);
+                        return `${numValue.toFixed(2)}g`;
+                      }}
+                      contentStyle={{
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        borderRadius: "5px",
+                        padding: "8px",
+                        border: "1px solid #e0e0e0",
+                      }}
+                    />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>

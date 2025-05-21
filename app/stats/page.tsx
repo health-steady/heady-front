@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
 import {
   LineChart,
@@ -62,6 +62,9 @@ export default function Stats() {
   const [bloodSugarData, setBloodSugarData] = useState<BloodSugarData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAnalysisLoading, setIsAnalysisLoading] = useState(false);
+  // API 호출 중인지 추적하는 ref 추가
+  const isApiCallingRef = useRef(false);
 
   // 혈당 통계 계산
   const bloodSugarStats = {
@@ -177,6 +180,84 @@ export default function Stats() {
   // AI 분석 페이지로 이동하는 함수
   const goToAIAnalysis = () => {
     router.push("/health-analysis");
+  };
+
+  // AI 분석 요청 및 처리 함수
+  const handleAIAnalysis = async () => {
+    // 이미 API 호출 중이거나 로딩 중인 경우 중복 호출 방지
+    if (isApiCallingRef.current || isAnalysisLoading) {
+      console.log("API 호출이 이미 진행 중입니다.");
+      return;
+    }
+
+    try {
+      // API 호출 중 플래그 설정
+      isApiCallingRef.current = true;
+      // 분석 로딩 상태 활성화
+      setIsAnalysisLoading(true);
+
+      // 새 창 열기 (API 호출 전에 열어서 사용자에게 즉시 반응 보여줌)
+      const analysisWindow = window.open(
+        "/health-analysis?pending=true",
+        "_blank"
+      );
+
+      // 새 창에 메시지를 전달하기 위한 이벤트 리스너 설정
+      const messageChannel = new BroadcastChannel("health_analysis_channel");
+
+      console.log("API 호출 시작...");
+
+      // API 호출
+      const response = await fetch("http://localhost:8080/api/ai-analysis/v1", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+
+      console.log("API 응답 상태:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("API 오류 응답:", errorText);
+        throw new Error(
+          `AI 분석 데이터를 가져오는데 실패했습니다. 상태 코드: ${response.status}`
+        );
+      }
+
+      // API 응답 데이터
+      const analysisData = await response.json();
+      console.log("API 응답 데이터:", analysisData);
+
+      // 응답 구조 검사
+      if (!analysisData) {
+        throw new Error("API 응답 데이터가 비어있습니다.");
+      }
+
+      // 로컬 스토리지에 분석 결과 저장
+      localStorage.setItem("aiAnalysisData", JSON.stringify(analysisData));
+      console.log("로컬 스토리지에 데이터 저장 완료");
+
+      // 브로드캐스트 채널을 통해 데이터가 준비되었음을 알림
+      messageChannel.postMessage({ type: "ANALYSIS_DATA_READY" });
+
+      // 메시지 채널 종료
+      setTimeout(() => {
+        messageChannel.close();
+      }, 1000);
+    } catch (error) {
+      console.error("AI 분석 오류:", error);
+      alert(
+        `AI 분석 중 오류가 발생했습니다: ${
+          error instanceof Error ? error.message : "알 수 없는 오류"
+        }`
+      );
+    } finally {
+      setIsAnalysisLoading(false);
+      // API 호출 플래그 초기화
+      isApiCallingRef.current = false;
+    }
   };
 
   return (
@@ -442,25 +523,32 @@ export default function Stats() {
             {/* AI 분석 버튼 - 통계 섹션 아래로 이동 */}
             <div className="p-4 bg-white rounded-lg shadow-sm mt-2">
               <button
-                onClick={() => {
-                  // 새 창에서 결과가 나타나도록 수정
-                  window.open("/health-analysis", "_blank");
-                }}
-                className="w-full py-3 bg-blue-500 text-white rounded-lg font-medium flex items-center justify-center hover:bg-blue-600 transition-colors"
+                onClick={handleAIAnalysis}
+                disabled={isAnalysisLoading}
+                className="w-full py-3 bg-blue-500 text-white rounded-lg font-medium flex items-center justify-center hover:bg-blue-600 transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 mr-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                AI 분석
+                {isAnalysisLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
+                    분석 중...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    AI 분석
+                  </>
+                )}
               </button>
             </div>
           </div>
