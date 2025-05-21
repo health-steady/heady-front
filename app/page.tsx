@@ -12,6 +12,7 @@ import SignupModal, { SignupData } from "@/components/SignupModal";
 import MealInputModal from "@/components/MealInputModal";
 import { authService, UserInfo } from "@/services/auth";
 import axios from "axios";
+import { API_BASE_URL } from "@/config/apiConfig";
 
 // 혈당 데이터 인터페이스
 interface BloodSugarData {
@@ -96,7 +97,7 @@ export default function Home() {
 
         // 혈당 데이터 가져오기
         const bloodSugarResponse = await axios.get(
-          `http://localhost:8080/api/bloodSugars/v1/summary?date=${dateString}`,
+          `${API_BASE_URL}/api/blood-sugars/v1/summary?date=${dateString}`,
           { headers }
         );
 
@@ -106,7 +107,7 @@ export default function Home() {
 
         // 회원 정보 가져오기
         const memberResponse = await axios.get(
-          "http://localhost:8080/api/members/v1",
+          `${API_BASE_URL}/api/members/v1`,
           { headers }
         );
 
@@ -138,7 +139,7 @@ export default function Home() {
 
         // 영양소 섭취 데이터 가져오기
         const nutrientResponse = await axios.get(
-          `http://localhost:8080/api/meals/v1/nutrients/summary?date=${dateString}`,
+          `${API_BASE_URL}/api/meals/v1/nutrients/summary?date=${dateString}`,
           { headers }
         );
 

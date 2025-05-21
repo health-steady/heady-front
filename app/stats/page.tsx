@@ -15,6 +15,7 @@ import {
   DotProps,
 } from "recharts";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/config/apiConfig";
 
 // 혈당 데이터 타입 정의
 interface BloodSugarData {
@@ -98,7 +99,7 @@ export default function Stats() {
       const formattedDate = `${year}-${month}-${day}`;
 
       const response = await fetch(
-        `http://localhost:8080/api/bloodSugars/v1/${formattedDate}`,
+        `${API_BASE_URL}/api/blood-sugars/v1/${formattedDate}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
