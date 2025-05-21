@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { mealService, FoodInfo } from "../services/meal";
 import { foodService, FoodDto } from "../services/food";
 import Pagination from "./Pagination";
+import Swal from "sweetalert2";
 
 export interface MealInputData {
   mealTime: string;
@@ -190,6 +191,42 @@ export default function MealInputModal({
       onSubmit(response);
     } catch (error: any) {
       console.error("식사 기록 저장 실패:", error);
+
+      // 400 에러 응답 처리
+      if (error.response && error.response.status === 400) {
+        // 응답 메시지 또는 상세 에러 정보를 Sweet Alert으로 표시
+        let errorMessage =
+          "요청 처리 중 오류가 발생했습니다. (400 Bad Request)";
+
+        if (error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else if (
+          error.response.data &&
+          typeof error.response.data === "string"
+        ) {
+          errorMessage = error.response.data;
+        }
+
+        Swal.fire({
+          title: "오류",
+          text: errorMessage,
+          icon: "error",
+          confirmButtonText: "확인",
+          confirmButtonColor: "#000000",
+          customClass: {
+            container: "swal-overlay-z-index",
+          },
+        });
+
+        // 스타일 추가 - SweetAlert2의 z-index 증가
+        const style = document.createElement("style");
+        style.innerHTML = `
+          .swal-overlay-z-index {
+            z-index: 10000 !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
     }
   };
 
