@@ -148,7 +148,6 @@ export default function MealInputModal({
         아침: "BREAKFAST",
         점심: "LUNCH",
         저녁: "DINNER",
-        간식: "SNACK",
       };
 
       // 선택된 음식(검색으로 추가한 음식) 목록 복사
@@ -176,8 +175,7 @@ export default function MealInputModal({
         mealType: mealTypeMap[mealData.mealTime] as
           | "BREAKFAST"
           | "LUNCH"
-          | "DINNER"
-          | "SNACK",
+          | "DINNER",
         mealDateTime: `${formattedDate} ${timeString}`,
         foods: allFoods,
         memo: memo,
@@ -446,11 +444,11 @@ export default function MealInputModal({
                 className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
               >
-                <option value="">선택해주세요</option>
-                <option value="아침">아침</option>
-                <option value="점심">점심</option>
-                <option value="저녁">저녁</option>
-                <option value="간식">간식</option>
+                {" "}
+                <option value="">선택해주세요</option>{" "}
+                <option value="아침">아침</option>{" "}
+                <option value="점심">점심</option>{" "}
+                <option value="저녁">저녁</option>{" "}
               </select>
             </div>
 
