@@ -4,7 +4,7 @@ import Image from "next/image";
 import { authService } from "../services/auth";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { API_BASE_URL } from "@/config/apiConfig";
+import { API_BASE_URL, API_ENDPOINTS } from "@/config/apiConfig";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -64,7 +64,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
     try {
       // 혈당 데이터 가져오기
       const bloodSugarResponse = await axios.get<BloodSugarSummary>(
-        `http://localhost:8080/api/blood-sugars/v1/summary?date=${currentDate}`,
+        `${API_BASE_URL}${API_ENDPOINTS.BLOOD_SUGAR_SUMMARY}?date=${currentDate}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -74,7 +74,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
       // 영양소 데이터 가져오기
       const nutrientsResponse = await axios.get<NutrientsSummary>(
-        `http://localhost:8080/api/meals/v1/nutrients/summary?date=${currentDate}`,
+        `${API_BASE_URL}${API_ENDPOINTS.NUTRIENTS_SUMMARY}?date=${currentDate}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

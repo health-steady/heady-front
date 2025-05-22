@@ -1,5 +1,5 @@
 import api from "./api";
-import { API_ENDPOINTS } from "../config/apiConfig";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/apiConfig";
 
 export interface UserInfo {
   id: number;
@@ -97,7 +97,7 @@ export const authService = {
   updateUserInfo: async (userData: Record<string, any>): Promise<UserInfo> => {
     try {
       const response = await api.patch(
-        "http://localhost:8080/api/members/v1",
+        `${API_BASE_URL}${API_ENDPOINTS.USER_INFO}`,
         userData
       );
       return response.data;

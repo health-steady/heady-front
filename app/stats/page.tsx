@@ -209,7 +209,7 @@ export default function Stats() {
       console.log("API 호출 시작...");
 
       // API 호출
-      const response = await fetch("http://localhost:8080/api/ai-analysis/v1", {
+      const response = await fetch(`${API_BASE_URL}/api/ai-analysis/v1`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
