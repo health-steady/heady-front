@@ -33,3 +33,17 @@ body {
   font-size: 1rem !important;
   padding: 0.5rem 1.5rem !important;
 }
+
+/* SweetAlert가 모달보다 앞에 표시되도록 z-index 설정 */
+.swal-container-class {
+  z-index: 10000 !important;
+}
+
+/* SweetAlert 전역 스타일 재정의 */
+.swal2-container {
+  z-index: 10000 !important;
+}
+
+.swal2-backdrop-show {
+  z-index: 10000 !important;
+}

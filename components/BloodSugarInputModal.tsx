@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { bloodSugarService, BloodSugarRequest } from "../services/bloodSugar";
+import Swal from "sweetalert2";
 
 interface BloodSugarInputModalProps {
   isOpen: boolean;
@@ -94,12 +95,75 @@ const BloodSugarInputModal: React.FC<BloodSugarInputModalProps> = ({
         memo: formData.memo,
       };
 
-      await bloodSugarService.record(bloodSugarData);
+      const response = await bloodSugarService.record(bloodSugarData);
+
+      onClose(); // 모달을 먼저 닫은 후 알림 표시
+
+      Swal.fire({
+        icon: "success",
+        title: "성공",
+        text: "혈당 기록이 성공적으로 저장되었습니다.",
+        customClass: {
+          container: "swal-container-class",
+        },
+        backdrop: `rgba(0,0,0,0.4)`,
+        allowOutsideClick: false,
+      });
 
       onSubmit(bloodSugarData);
-      onClose();
     } catch (error: any) {
       console.error("혈당 기록 저장 실패:", error);
+
+      onClose(); // 실패 시에도 모달을 먼저 닫기
+
+      let errorMessage = "혈당 기록 저장에 실패했습니다.";
+
+      // 응답 객체에서 에러 메시지 추출
+      if (error.response) {
+        if (error.response.status === 400) {
+          // 응답 데이터 구조 확인
+          if (error.response.data) {
+            if (typeof error.response.data === "string") {
+              // 문자열 형태로 오는 경우
+              errorMessage = error.response.data;
+            } else if (error.response.data.message) {
+              // {message: "에러 메시지"} 형태
+              errorMessage = error.response.data.message;
+            } else if (error.response.data.error) {
+              // {error: "에러 메시지"} 형태
+              errorMessage = error.response.data.error;
+            } else if (
+              error.response.data.errors &&
+              error.response.data.errors.length > 0
+            ) {
+              // {errors: ["에러 메시지1", "에러 메시지2"]} 형태
+              errorMessage = error.response.data.errors.join(", ");
+            }
+          }
+        } else if (error.response.status === 401) {
+          errorMessage = "인증이 필요합니다.";
+        } else if (error.response.status === 403) {
+          errorMessage = "접근 권한이 없습니다.";
+        } else if (error.response.status === 404) {
+          errorMessage = "요청한 리소스를 찾을 수 없습니다.";
+        } else if (error.response.status === 500) {
+          errorMessage = "서버 오류가 발생했습니다. 나중에 다시 시도해주세요.";
+        }
+      } else if (error.message) {
+        // axios나 자바스크립트 에러의 message 속성
+        errorMessage = error.message;
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "오류",
+        text: errorMessage,
+        customClass: {
+          container: "swal-container-class",
+        },
+        backdrop: `rgba(0,0,0,0.4)`,
+        allowOutsideClick: false,
+      });
     }
   };
 
