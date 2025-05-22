@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "GmarketSansMedium";
+  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,11 +15,13 @@
   --background-rgb: 255, 255, 255;
 }
 
+html,
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
   margin: 0;
   padding: 0;
+  font-family: "GmarketSansMedium", sans-serif !important;
 }
 
 /* SweetAlert2 커스텀 스타일 */

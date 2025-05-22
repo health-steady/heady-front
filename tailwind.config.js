@@ -7,6 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["GmarketSansMedium", "sans-serif"],
+        gmarket: ["GmarketSansMedium", "sans-serif"],
+      },
       colors: {
         primary: "#4CAF50",
         secondary: "#FFC107",
