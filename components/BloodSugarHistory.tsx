@@ -33,6 +33,15 @@ const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
     return "text-green-500"; // 목표 범위 내 - 좋음
   };
 
+  // 게이지 배경색 결정 함수 (별도 함수로 분리)
+  const getGaugeColor = (current: number, target: number) => {
+    if (current === 0) return "bg-gray-400"; // 데이터 없음
+    if (current > target * 1.3) return "bg-red-500"; // 목표보다 30% 이상 높음 - 위험
+    if (current > target) return "bg-orange-500"; // 목표보다 높음 - 주의
+    if (current < target * 0.7) return "bg-blue-500"; // 목표보다 30% 이상 낮음 - 저혈당 주의
+    return "bg-green-500"; // 목표 범위 내 - 좋음
+  };
+
   // 혈당 상태 메시지
   const getStatusMessage = (current: number, target: number) => {
     if (current === 0) return "데이터 없음";
@@ -148,10 +157,17 @@ const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
   // 진행 상태 퍼센트 계산
   const getPercentage = (current: number, target: number) => {
     if (current === 0) return 0;
-    // 목표 대비 비율 (목표가 100%가 되도록)
-    const percentage = (current / target) * 100;
-    // 5% ~ 95% 사이로 제한
-    return Math.min(Math.max(percentage, 5), 95);
+    // 목표값 기준으로 현재값의 비율 계산
+    // 혈당은 목표보다 낮거나 높을 수 있으므로 적절한 시각화 필요
+    if (current <= target) {
+      // 목표값보다 낮거나 같은 경우 (최소 30%에서 100%까지)
+      return Math.max(30, (current / target) * 100);
+    } else {
+      // 목표값보다 높은 경우 (100%에서 최대 170%까지)
+      const overPercentage =
+        100 + Math.min(70, ((current - target) / target) * 100);
+      return Math.min(overPercentage, 170);
+    }
   };
 
   return (
@@ -180,10 +196,10 @@ const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
               <div className="pt-2">
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full ${getStatusColor(
+                    className={`h-2 rounded-full ${getGaugeColor(
                       highestFasting,
                       targetFasting
-                    ).replace("text-", "bg-")}`}
+                    )}`}
                     style={{
                       width: `${getPercentage(highestFasting, targetFasting)}%`,
                     }}
@@ -219,10 +235,10 @@ const BloodSugarHistory: React.FC<BloodSugarHistoryProps> = ({ data }) => {
               <div className="pt-2">
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full ${getStatusColor(
+                    className={`h-2 rounded-full ${getGaugeColor(
                       highestPostprandial,
                       targetPostprandial
-                    ).replace("text-", "bg-")}`}
+                    )}`}
                     style={{
                       width: `${getPercentage(
                         highestPostprandial,

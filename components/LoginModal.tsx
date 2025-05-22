@@ -101,38 +101,35 @@ const LoginModal: React.FC<LoginModalProps> = ({
       const accessToken = await authService.login(email, password);
       // localStorage.setItem은 login 함수 내부에서 이미 처리됨
 
-      // SweetAlert을 사용하여 로그인 성공 알림 표시
-      Swal.fire({
-        title: "로그인 성공!",
-        text: "환영합니다!",
-        icon: "success",
-        confirmButtonText: "확인",
-        confirmButtonColor: "#3085d6",
-      }).then(() => {
-        // 로그인 성공 후 메인 페이지로 리다이렉션
-        window.location.href = "/";
-      });
-
-      // API 데이터 가져오기
-      await fetchData();
-
       // 로그인 성공 시 모달 닫기
       onClose();
 
       // 로그인 성공 이벤트를 상위 컴포넌트에 전달
       onLogin(email, password);
+
+      // API 데이터 가져오기
+      await fetchData();
+
+      // SweetAlert을 사용하여 상단에 토스트 형태로 로그인 성공 알림 표시
+      Swal.fire({
+        title: "로그인 성공!",
+        text: "환영합니다!",
+        icon: "success",
+        position: "top",
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        toast: true,
+      });
+
+      // 토스트 알림이 표시된 후 일정 시간 후에 리다이렉션 (사용자가 알림을 볼 수 있도록)
+      setTimeout(() => {
+        // 메인 페이지로 리다이렉션
+        window.location.href = "/";
+      }, 1000);
     } catch (error) {
       console.error("로그인 실패:", error);
       setError("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
-
-      // 로그인 실패 시 SweetAlert으로 에러 메시지 표시
-      Swal.fire({
-        title: "로그인 실패",
-        text: "이메일 또는 비밀번호가 올바르지 않습니다.",
-        icon: "error",
-        confirmButtonText: "확인",
-        confirmButtonColor: "#3085d6",
-      });
     }
   };
 
