@@ -6,6 +6,7 @@ export interface UserInfo {
   email: string;
   name: string;
   nickname: string | null;
+  gender: string | null;
   birthdate: string | null;
   height: number | null;
   weight: number | null;
@@ -16,6 +17,7 @@ export interface UserInfo {
     carbohydrate: number;
     protein: number;
     fat: number;
+    calories: number;
   };
   createdAt: string;
   updatedAt: string;
@@ -27,6 +29,7 @@ export interface Target {
   carbohydrate: number;
   protein: number;
   fat: number;
+  calories: number;
 }
 
 export const authService = {

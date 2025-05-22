@@ -94,11 +94,13 @@ export default function Profile() {
       setUserInfo(userData);
       setLocalUserInfo({
         name: userData.name,
-        gender: userData.nickname
-          ? userData.nickname.includes("남성")
-            ? "남성"
-            : "여성"
-          : "여성",
+        gender:
+          userData.gender ||
+          (userData.nickname
+            ? userData.nickname.includes("남성")
+              ? "남성"
+              : "여성"
+            : "여성"),
         birthdate: userData.birthdate || "",
         height: userData.height || 0,
         weight: userData.weight || 0,
@@ -752,11 +754,7 @@ export default function Profile() {
                           value={
                             modifiedData.calories !== undefined
                               ? modifiedData.calories
-                              : Math.round(
-                                  userInfo.target.carbohydrate * 4 +
-                                    userInfo.target.protein * 4 +
-                                    userInfo.target.fat * 9
-                                )
+                              : userInfo.target.calories
                           }
                           onChange={(e) =>
                             handleFieldChange(
@@ -774,41 +772,12 @@ export default function Profile() {
                           <p className="font-medium">
                             {modifiedData.calories !== undefined
                               ? `${modifiedData.calories} kcal`
-                              : `${Math.round(
-                                  (modifiedData.carbohydrate !== undefined
-                                    ? modifiedData.carbohydrate
-                                    : userInfo.target.carbohydrate) *
-                                    4 +
-                                    (modifiedData.protein !== undefined
-                                      ? modifiedData.protein
-                                      : userInfo.target.protein) *
-                                      4 +
-                                    (modifiedData.fat !== undefined
-                                      ? modifiedData.fat
-                                      : userInfo.target.fat) *
-                                      9
-                                )} kcal`}
+                              : `${userInfo.target.calories} kcal`}
                           </p>
                           <button
                             className="ml-2"
                             onClick={() =>
-                              startEditing(
-                                "calories",
-                                Math.round(
-                                  (modifiedData.carbohydrate !== undefined
-                                    ? modifiedData.carbohydrate
-                                    : userInfo.target.carbohydrate) *
-                                    4 +
-                                    (modifiedData.protein !== undefined
-                                      ? modifiedData.protein
-                                      : userInfo.target.protein) *
-                                      4 +
-                                    (modifiedData.fat !== undefined
-                                      ? modifiedData.fat
-                                      : userInfo.target.fat) *
-                                      9
-                                )
-                              )
+                              startEditing("calories", userInfo.target.calories)
                             }
                           >
                             <svg
