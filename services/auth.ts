@@ -94,9 +94,12 @@ export const authService = {
     }
   },
 
-  updateUserInfo: async (userData: Partial<UserInfo>): Promise<UserInfo> => {
+  updateUserInfo: async (userData: Record<string, any>): Promise<UserInfo> => {
     try {
-      const response = await api.put(API_ENDPOINTS.USER_INFO, userData);
+      const response = await api.patch(
+        "http://localhost:8080/api/members/v1",
+        userData
+      );
       return response.data;
     } catch (error) {
       console.error("사용자 정보 업데이트 실패:", error);

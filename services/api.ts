@@ -60,6 +60,12 @@ const api = {
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> => apiClient.put<T>(url, data, config),
 
+  patch: <T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> => apiClient.patch<T>(url, data, config),
+
   delete: <T = any>(
     url: string,
     config?: AxiosRequestConfig

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import BottomNavigation from "@/components/BottomNavigation";
 import { authService, UserInfo, Target } from "@/services/auth";
+import Swal from "sweetalert2";
 
 export default function Profile() {
   const router = useRouter();
@@ -49,8 +50,51 @@ export default function Profile() {
     if (!hasChanges) return;
 
     try {
+      // 서버로 전송할 업데이트 데이터 생성 (플랫한 구조)
+      const updateData: Record<string, any> = {
+        // 사용자 기본 정보
+        name:
+          modifiedData.name !== undefined
+            ? modifiedData.name
+            : localUserInfo.name,
+        height:
+          modifiedData.height !== undefined
+            ? modifiedData.height
+            : localUserInfo.height,
+        weight:
+          modifiedData.weight !== undefined
+            ? modifiedData.weight
+            : localUserInfo.weight,
+
+        // 혈당 및 영양 목표 정보
+        fastingBloodSugar:
+          modifiedData.fastingBloodSugar !== undefined
+            ? modifiedData.fastingBloodSugar
+            : userInfo?.target?.fastingBloodSugar,
+        postprandialBloodSugar:
+          modifiedData.postprandialBloodSugar !== undefined
+            ? modifiedData.postprandialBloodSugar
+            : userInfo?.target?.postprandialBloodSugar,
+        carbohydrate:
+          modifiedData.carbohydrate !== undefined
+            ? modifiedData.carbohydrate
+            : userInfo?.target?.carbohydrate,
+        protein:
+          modifiedData.protein !== undefined
+            ? modifiedData.protein
+            : userInfo?.target?.protein,
+        fat:
+          modifiedData.fat !== undefined
+            ? modifiedData.fat
+            : userInfo?.target?.fat,
+        calories:
+          modifiedData.calories !== undefined
+            ? modifiedData.calories
+            : userInfo?.target?.calories,
+      };
+
       // API 호출하여 서버에 업데이트
-      await authService.updateUserInfo(modifiedData);
+      await authService.updateUserInfo(updateData);
 
       // 사용자 정보 다시 불러오기
       await fetchUserInfo();
@@ -58,9 +102,26 @@ export default function Profile() {
       // 수정 모드 종료 및 임시 데이터 초기화
       setEditingField(null);
       setModifiedData({});
+
+      // 성공 메시지
+      Swal.fire({
+        title: "저장 완료",
+        text: "정보가 성공적으로 저장되었습니다.",
+        icon: "success",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "확인",
+      });
     } catch (error) {
       console.error("정보 업데이트 실패:", error);
-      alert("정보 업데이트에 실패했습니다.");
+
+      // 에러 메시지
+      Swal.fire({
+        title: "저장 실패",
+        text: "정보 업데이트에 실패했습니다. 다시 시도해주세요.",
+        icon: "error",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "확인",
+      });
     }
   };
 
