@@ -109,12 +109,7 @@ export default function MealInputModal({
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
       e.preventDefault();
-    }
-
-    if (foodList.length === 0 && selectedFoods.length === 0) {
-      console.error("최소 하나의 음식을 입력해주세요.");
-      return;
-    }
+    } // 식사 시간 유효성 검사    if (!mealData.mealTime) {      Swal.fire({        title: "알림",        text: "식사 시간을 선택해주세요.",        icon: "warning",        confirmButtonText: "확인",        confirmButtonColor: "#000000",        customClass: {          container: "swal-overlay-z-index",        },      });      return;    }    // 음식 유효성 검사    if (foodList.length === 0 && selectedFoods.length === 0) {      Swal.fire({        title: "알림",        text: "최소 하나의 음식을 입력해주세요.",        icon: "warning",        confirmButtonText: "확인",        confirmButtonColor: "#000000",        customClass: {          container: "swal-overlay-z-index",        },      });      return;    }
 
     console.log("===== 제출 전 데이터 확인 =====");
     console.log("선택된 음식 상태(selectedFoods):", selectedFoods);
