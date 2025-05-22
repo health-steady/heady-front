@@ -17,6 +17,66 @@ export default function Profile() {
     weight: 0,
   });
 
+  // 수정된 값을 임시 저장할 상태
+  const [modifiedData, setModifiedData] = useState<Record<string, any>>({});
+
+  // 수정 중인 필드 상태 관리
+  const [editingField, setEditingField] = useState<string | null>(null);
+
+  // 변경 사항 있는지 확인
+  const hasChanges = Object.keys(modifiedData).length > 0;
+
+  // 수정 시작
+  const startEditing = (field: string, value: string | number) => {
+    setEditingField(field);
+  };
+
+  // 수정 모드 해제
+  const stopEditing = () => {
+    setEditingField(null);
+  };
+
+  // 필드 값 변경 처리
+  const handleFieldChange = (field: string, value: string | number) => {
+    setModifiedData({
+      ...modifiedData,
+      [field]: value,
+    });
+  };
+
+  // 모든 변경사항 저장
+  const saveAllChanges = async () => {
+    if (!hasChanges) return;
+
+    try {
+      // API 호출하여 서버에 업데이트
+      await authService.updateUserInfo(modifiedData);
+
+      // 사용자 정보 다시 불러오기
+      await fetchUserInfo();
+
+      // 수정 모드 종료 및 임시 데이터 초기화
+      setEditingField(null);
+      setModifiedData({});
+    } catch (error) {
+      console.error("정보 업데이트 실패:", error);
+      alert("정보 업데이트에 실패했습니다.");
+    }
+  };
+
+  // 수정 취소
+  const cancelChanges = () => {
+    setEditingField(null);
+    setModifiedData({});
+  };
+
+  // Enter 키 처리
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      setEditingField(null);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
@@ -148,98 +208,110 @@ export default function Profile() {
                 <div className="flex justify-between items-center border-b pb-2">
                   <span className="text-base">이름</span>
                   <div className="flex items-center">
-                    <span className="text-base font-medium">
-                      {localUserInfo.name}
-                    </span>
-                    <button className="ml-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-gray-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                        />
-                      </svg>
-                    </button>
+                    {editingField === "name" ? (
+                      <input
+                        type="text"
+                        value={
+                          modifiedData.name !== undefined
+                            ? modifiedData.name
+                            : localUserInfo.name
+                        }
+                        onChange={(e) =>
+                          handleFieldChange("name", e.target.value)
+                        }
+                        onKeyDown={handleKeyPress}
+                        onBlur={stopEditing}
+                        autoFocus
+                        className="text-base font-medium border rounded px-2 py-1"
+                      />
+                    ) : (
+                      <>
+                        <span className="text-base font-medium">
+                          {modifiedData.name !== undefined
+                            ? modifiedData.name
+                            : localUserInfo.name}
+                        </span>
+                        <button
+                          className="ml-2"
+                          onClick={() =>
+                            startEditing("name", localUserInfo.name)
+                          }
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-gray-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                            />
+                          </svg>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center border-b pb-2">
                   <span className="text-base">성별</span>
                   <div className="flex items-center">
-                    <span className="text-base font-medium">
-                      {localUserInfo.gender}
-                    </span>
-                    <button className="ml-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-gray-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                        />
-                      </svg>
-                    </button>
+                    {editingField === "gender" ? (
+                      <input
+                        type="text"
+                        value={
+                          modifiedData.gender !== undefined
+                            ? modifiedData.gender
+                            : localUserInfo.gender
+                        }
+                        onChange={(e) =>
+                          handleFieldChange("gender", e.target.value)
+                        }
+                        onKeyDown={handleKeyPress}
+                        onBlur={stopEditing}
+                        autoFocus
+                        className="text-base font-medium border rounded px-2 py-1"
+                      />
+                    ) : (
+                      <span className="text-base font-medium">
+                        {modifiedData.gender !== undefined
+                          ? modifiedData.gender
+                          : localUserInfo.gender}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center border-b pb-2">
                   <span className="text-base">생년월일</span>
                   <div className="flex items-center">
-                    <span className="text-base font-medium">
-                      {localUserInfo.birthdate}
-                    </span>
-                    <button className="ml-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-gray-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center border-b pb-2">
-                  <span className="text-base">일일 칼로리 목표</span>
-                  <div className="flex items-center">
-                    <span className="text-base font-medium">2000 kcal</span>
-                    <button className="ml-2">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-gray-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                        />
-                      </svg>
-                    </button>
+                    {editingField === "birthdate" ? (
+                      <input
+                        type="text"
+                        value={
+                          modifiedData.birthdate !== undefined
+                            ? modifiedData.birthdate
+                            : localUserInfo.birthdate
+                        }
+                        onChange={(e) =>
+                          handleFieldChange("birthdate", e.target.value)
+                        }
+                        onKeyDown={handleKeyPress}
+                        onBlur={stopEditing}
+                        autoFocus
+                        className="text-base font-medium border rounded px-2 py-1"
+                      />
+                    ) : (
+                      <span className="text-base font-medium">
+                        {modifiedData.birthdate !== undefined
+                          ? modifiedData.birthdate
+                          : localUserInfo.birthdate}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -263,37 +335,113 @@ export default function Profile() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-base">키</span>
-                  <div className="flex items-center border rounded-md overflow-hidden">
-                    <input
-                      type="number"
-                      value={localUserInfo.height}
-                      onChange={(e) =>
-                        setLocalUserInfo({
-                          ...localUserInfo,
-                          height: parseFloat(e.target.value),
-                        })
-                      }
-                      className="w-20 p-2 text-right outline-none"
-                    />
-                    <span className="px-2 bg-gray-100">cm</span>
+                  <div className="flex items-center">
+                    {editingField === "height" ? (
+                      <input
+                        type="number"
+                        value={
+                          modifiedData.height !== undefined
+                            ? modifiedData.height
+                            : localUserInfo.height
+                        }
+                        onChange={(e) =>
+                          handleFieldChange(
+                            "height",
+                            parseFloat(e.target.value)
+                          )
+                        }
+                        onKeyDown={handleKeyPress}
+                        onBlur={stopEditing}
+                        autoFocus
+                        className="text-base font-medium border rounded px-2 py-1 w-20"
+                      />
+                    ) : (
+                      <>
+                        <span className="text-base font-medium mr-2">
+                          {modifiedData.height !== undefined
+                            ? modifiedData.height
+                            : localUserInfo.height}{" "}
+                          cm
+                        </span>
+                        <button
+                          className="ml-2"
+                          onClick={() =>
+                            startEditing("height", localUserInfo.height)
+                          }
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-gray-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                            />
+                          </svg>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="text-base">몸무게</span>
-                  <div className="flex items-center border rounded-md overflow-hidden">
-                    <input
-                      type="number"
-                      value={localUserInfo.weight}
-                      onChange={(e) =>
-                        setLocalUserInfo({
-                          ...localUserInfo,
-                          weight: parseFloat(e.target.value),
-                        })
-                      }
-                      className="w-20 p-2 text-right outline-none"
-                    />
-                    <span className="px-2 bg-gray-100">kg</span>
+                  <div className="flex items-center">
+                    {editingField === "weight" ? (
+                      <input
+                        type="number"
+                        value={
+                          modifiedData.weight !== undefined
+                            ? modifiedData.weight
+                            : localUserInfo.weight
+                        }
+                        onChange={(e) =>
+                          handleFieldChange(
+                            "weight",
+                            parseFloat(e.target.value)
+                          )
+                        }
+                        onKeyDown={handleKeyPress}
+                        onBlur={stopEditing}
+                        autoFocus
+                        className="text-base font-medium border rounded px-2 py-1 w-20"
+                      />
+                    ) : (
+                      <>
+                        <span className="text-base font-medium mr-2">
+                          {modifiedData.weight !== undefined
+                            ? modifiedData.weight
+                            : localUserInfo.weight}{" "}
+                          kg
+                        </span>
+                        <button
+                          className="ml-2"
+                          onClick={() =>
+                            startEditing("weight", localUserInfo.weight)
+                          }
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-gray-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                            />
+                          </svg>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -308,17 +456,121 @@ export default function Profile() {
                   혈당 목표
                 </h3>
                 <div className="grid grid-cols-2 gap-2 mb-4">
-                  <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="bg-blue-50 p-3 rounded-lg relative">
                     <p className="text-xs text-gray-500">공복 혈당</p>
-                    <p className="font-medium">
-                      {userInfo.target.fastingBloodSugar} mg/dL
-                    </p>
+                    <div className="flex items-center">
+                      {editingField === "fastingBloodSugar" ? (
+                        <input
+                          type="number"
+                          value={
+                            modifiedData.fastingBloodSugar !== undefined
+                              ? modifiedData.fastingBloodSugar
+                              : userInfo.target.fastingBloodSugar
+                          }
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "fastingBloodSugar",
+                              parseFloat(e.target.value)
+                            )
+                          }
+                          onKeyDown={handleKeyPress}
+                          onBlur={stopEditing}
+                          autoFocus
+                          className="font-medium border rounded px-2 py-1 w-20"
+                        />
+                      ) : (
+                        <>
+                          <p className="font-medium">
+                            {modifiedData.fastingBloodSugar !== undefined
+                              ? modifiedData.fastingBloodSugar
+                              : userInfo.target.fastingBloodSugar}{" "}
+                            mg/dL
+                          </p>
+                          <button
+                            className="ml-2"
+                            onClick={() =>
+                              startEditing(
+                                "fastingBloodSugar",
+                                userInfo.target.fastingBloodSugar
+                              )
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-gray-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="bg-blue-50 p-3 rounded-lg relative">
                     <p className="text-xs text-gray-500">식후 혈당</p>
-                    <p className="font-medium">
-                      {userInfo.target.postprandialBloodSugar} mg/dL
-                    </p>
+                    <div className="flex items-center">
+                      {editingField === "postprandialBloodSugar" ? (
+                        <input
+                          type="number"
+                          value={
+                            modifiedData.postprandialBloodSugar !== undefined
+                              ? modifiedData.postprandialBloodSugar
+                              : userInfo.target.postprandialBloodSugar
+                          }
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "postprandialBloodSugar",
+                              parseFloat(e.target.value)
+                            )
+                          }
+                          onKeyDown={handleKeyPress}
+                          onBlur={stopEditing}
+                          autoFocus
+                          className="font-medium border rounded px-2 py-1 w-20"
+                        />
+                      ) : (
+                        <>
+                          <p className="font-medium">
+                            {modifiedData.postprandialBloodSugar !== undefined
+                              ? modifiedData.postprandialBloodSugar
+                              : userInfo.target.postprandialBloodSugar}{" "}
+                            mg/dL
+                          </p>
+                          <button
+                            className="ml-2"
+                            onClick={() =>
+                              startEditing(
+                                "postprandialBloodSugar",
+                                userInfo.target.postprandialBloodSugar
+                              )
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-gray-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -326,35 +578,284 @@ export default function Profile() {
                   영양 목표
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="bg-green-50 p-3 rounded-lg relative">
                     <p className="text-xs text-gray-500">탄수화물</p>
-                    <p className="font-medium">
-                      {userInfo.target.carbohydrate.toFixed(1)}g
-                    </p>
+                    <div className="flex items-center">
+                      {editingField === "carbohydrate" ? (
+                        <input
+                          type="number"
+                          value={
+                            modifiedData.carbohydrate !== undefined
+                              ? modifiedData.carbohydrate
+                              : userInfo.target.carbohydrate
+                          }
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "carbohydrate",
+                              parseFloat(e.target.value)
+                            )
+                          }
+                          onKeyDown={handleKeyPress}
+                          onBlur={stopEditing}
+                          autoFocus
+                          className="font-medium border rounded px-2 py-1 w-20"
+                        />
+                      ) : (
+                        <>
+                          <p className="font-medium">
+                            {modifiedData.carbohydrate !== undefined
+                              ? modifiedData.carbohydrate.toFixed(1)
+                              : userInfo.target.carbohydrate.toFixed(1)}
+                            g
+                          </p>
+                          <button
+                            className="ml-2"
+                            onClick={() =>
+                              startEditing(
+                                "carbohydrate",
+                                userInfo.target.carbohydrate
+                              )
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-gray-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="bg-green-50 p-3 rounded-lg relative">
                     <p className="text-xs text-gray-500">단백질</p>
-                    <p className="font-medium">
-                      {userInfo.target.protein.toFixed(1)}g
-                    </p>
+                    <div className="flex items-center">
+                      {editingField === "protein" ? (
+                        <input
+                          type="number"
+                          value={
+                            modifiedData.protein !== undefined
+                              ? modifiedData.protein
+                              : userInfo.target.protein
+                          }
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "protein",
+                              parseFloat(e.target.value)
+                            )
+                          }
+                          onKeyDown={handleKeyPress}
+                          onBlur={stopEditing}
+                          autoFocus
+                          className="font-medium border rounded px-2 py-1 w-20"
+                        />
+                      ) : (
+                        <>
+                          <p className="font-medium">
+                            {modifiedData.protein !== undefined
+                              ? modifiedData.protein.toFixed(1)
+                              : userInfo.target.protein.toFixed(1)}
+                            g
+                          </p>
+                          <button
+                            className="ml-2"
+                            onClick={() =>
+                              startEditing("protein", userInfo.target.protein)
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-gray-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="bg-green-50 p-3 rounded-lg relative">
                     <p className="text-xs text-gray-500">지방</p>
-                    <p className="font-medium">
-                      {userInfo.target.fat.toFixed(1)}g
-                    </p>
+                    <div className="flex items-center">
+                      {editingField === "fat" ? (
+                        <input
+                          type="number"
+                          value={
+                            modifiedData.fat !== undefined
+                              ? modifiedData.fat
+                              : userInfo.target.fat
+                          }
+                          onChange={(e) =>
+                            handleFieldChange("fat", parseFloat(e.target.value))
+                          }
+                          onKeyDown={handleKeyPress}
+                          onBlur={stopEditing}
+                          autoFocus
+                          className="font-medium border rounded px-2 py-1 w-20"
+                        />
+                      ) : (
+                        <>
+                          <p className="font-medium">
+                            {modifiedData.fat !== undefined
+                              ? modifiedData.fat.toFixed(1)
+                              : userInfo.target.fat.toFixed(1)}
+                            g
+                          </p>
+                          <button
+                            className="ml-2"
+                            onClick={() =>
+                              startEditing("fat", userInfo.target.fat)
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-gray-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
                   <div className="bg-green-50 p-3 rounded-lg">
                     <p className="text-xs text-gray-500">칼로리</p>
-                    <p className="font-medium">
-                      {/* 칼로리 계산: 탄수화물 4kcal + 단백질 4kcal + 지방 9kcal */}
-                      {Math.round(
-                        userInfo.target.carbohydrate * 4 +
-                          userInfo.target.protein * 4 +
-                          userInfo.target.fat * 9
-                      )}{" "}
-                      kcal
+                    <div className="flex items-center">
+                      {editingField === "calories" ? (
+                        <input
+                          type="number"
+                          value={
+                            modifiedData.calories !== undefined
+                              ? modifiedData.calories
+                              : Math.round(
+                                  userInfo.target.carbohydrate * 4 +
+                                    userInfo.target.protein * 4 +
+                                    userInfo.target.fat * 9
+                                )
+                          }
+                          onChange={(e) =>
+                            handleFieldChange(
+                              "calories",
+                              parseFloat(e.target.value)
+                            )
+                          }
+                          onKeyDown={handleKeyPress}
+                          onBlur={stopEditing}
+                          autoFocus
+                          className="font-medium border rounded px-2 py-1 w-20"
+                        />
+                      ) : (
+                        <>
+                          <p className="font-medium">
+                            {modifiedData.calories !== undefined
+                              ? `${modifiedData.calories} kcal`
+                              : `${Math.round(
+                                  (modifiedData.carbohydrate !== undefined
+                                    ? modifiedData.carbohydrate
+                                    : userInfo.target.carbohydrate) *
+                                    4 +
+                                    (modifiedData.protein !== undefined
+                                      ? modifiedData.protein
+                                      : userInfo.target.protein) *
+                                      4 +
+                                    (modifiedData.fat !== undefined
+                                      ? modifiedData.fat
+                                      : userInfo.target.fat) *
+                                      9
+                                )} kcal`}
+                          </p>
+                          <button
+                            className="ml-2"
+                            onClick={() =>
+                              startEditing(
+                                "calories",
+                                Math.round(
+                                  (modifiedData.carbohydrate !== undefined
+                                    ? modifiedData.carbohydrate
+                                    : userInfo.target.carbohydrate) *
+                                    4 +
+                                    (modifiedData.protein !== undefined
+                                      ? modifiedData.protein
+                                      : userInfo.target.protein) *
+                                      4 +
+                                    (modifiedData.fat !== undefined
+                                      ? modifiedData.fat
+                                      : userInfo.target.fat) *
+                                      9
+                                )
+                              )
+                            }
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-5 w-5 text-gray-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 저장 버튼 */}
+            {hasChanges && (
+              <div className="fixed bottom-20 left-0 right-0 max-w-[500px] mx-auto p-4 z-10">
+                <div className="bg-white rounded-md shadow-lg border border-gray-200 p-4">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-600">
+                      변경 사항이 있습니다
                     </p>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={cancelChanges}
+                        className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
+                      >
+                        취소
+                      </button>
+                      <button
+                        onClick={saveAllChanges}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                      >
+                        모두 저장
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

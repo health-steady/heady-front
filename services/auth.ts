@@ -91,6 +91,16 @@ export const authService = {
     }
   },
 
+  updateUserInfo: async (userData: Partial<UserInfo>): Promise<UserInfo> => {
+    try {
+      const response = await api.put(API_ENDPOINTS.USER_INFO, userData);
+      return response.data;
+    } catch (error) {
+      console.error("사용자 정보 업데이트 실패:", error);
+      throw error;
+    }
+  },
+
   logout: (): void => {
     // 로컬 스토리지에서 토큰 제거
     if (typeof window !== "undefined") {
