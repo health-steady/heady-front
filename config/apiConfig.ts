@@ -29,7 +29,7 @@ export const API_ENDPOINTS = {
   // 식사 관련
   NUTRIENTS_SUMMARY: "/api/meals/v1/nutrients/summary",
   FOOD_SEARCH: "/api/foods/v1/search",
-  MEAL_RECORD: "/api/meals/v1/record",
+  MEAL_RECORD: "/api/meals/v1",
 };
 
 export default {
