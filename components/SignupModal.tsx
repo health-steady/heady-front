@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { authService } from "../services/auth";
+import Swal from "sweetalert2";
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -176,7 +177,37 @@ const SignupModal: React.FC<SignupModalProps> = ({
       console.log("회원가입 요청 데이터:", registerData);
       await authService.register(registerData);
 
+      // 회원가입 모달 먼저 닫기
       onClose();
+
+      // document에 스타일 추가 (이미 있으면 추가하지 않음)
+      if (!document.getElementById("swal2-highest-z-style")) {
+        const styleEl = document.createElement("style");
+        styleEl.id = "swal2-highest-z-style";
+        styleEl.innerHTML = `
+          body > .swal2-container {
+            z-index: 999999 !important;
+          }
+          body > .swal2-backdrop {
+            z-index: 999998 !important;
+          }
+        `;
+        document.head.appendChild(styleEl);
+      }
+
+      // 약간의 지연 후에 알림 표시 (모달이 완전히 닫힌 후)
+      setTimeout(async () => {
+        await Swal.fire({
+          icon: "success",
+          title: "회원가입 성공!",
+          text: "회원가입이 성공적으로 완료되었습니다.",
+          confirmButtonText: "확인",
+          confirmButtonColor: "#000",
+          allowOutsideClick: false,
+          position: "center",
+          showConfirmButton: true,
+        });
+      }, 100);
 
       // 회원가입 성공 후 자동 로그인 처리
       if (onSignupSuccess) {
