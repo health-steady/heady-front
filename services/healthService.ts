@@ -1,8 +1,7 @@
 import axios from "axios";
 
 // API 엔드포인트 기본 URL
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.example.com";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
 // 헬스 데이터 분석 서비스
 export const healthService = {

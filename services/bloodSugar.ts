@@ -32,7 +32,7 @@ export interface BloodSugarResponse {
 export const bloodSugarService = {
   record: async (data: BloodSugarRequest) => {
     const response = await api.post<BloodSugarResponse>(
-      "/api/blood-sugars/v1",
+      API_ENDPOINTS.BLOOD_SUGAR_RECORD,
       data
     );
     return response.data;
@@ -40,7 +40,7 @@ export const bloodSugarService = {
 
   getAllByDate: async (date: string) => {
     const response = await api.get<BloodSugarResponse[]>(
-      "/api/blood-sugars/v1",
+      API_ENDPOINTS.BLOOD_SUGAR_RECORD,
       {
         params: { date },
       }
@@ -49,7 +49,9 @@ export const bloodSugarService = {
   },
 
   delete: async (id: number) => {
-    const response = await api.delete(`/api/blood-sugars/v1/${id}`);
+    const response = await api.delete(
+      `${API_ENDPOINTS.BLOOD_SUGAR_RECORD}/${id}`
+    );
     return response.data;
   },
 };

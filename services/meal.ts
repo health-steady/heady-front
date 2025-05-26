@@ -25,12 +25,15 @@ export interface MealResponse {
 
 export const mealService = {
   createMeal: async (data: MealRequest) => {
-    const response = await api.post<MealResponse>("/api/meals/v1", data);
+    const response = await api.post<MealResponse>(
+      API_ENDPOINTS.MEAL_RECORD,
+      data
+    );
     return response.data;
   },
 
   delete: async (id: number) => {
-    const response = await api.delete(`/api/meals/v1/${id}`);
+    const response = await api.delete(`${API_ENDPOINTS.MEAL_RECORD}/${id}`);
     return response.data;
   },
 };

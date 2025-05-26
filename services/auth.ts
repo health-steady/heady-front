@@ -96,10 +96,7 @@ export const authService = {
 
   updateUserInfo: async (userData: Record<string, any>): Promise<UserInfo> => {
     try {
-      const response = await api.patch(
-        `${API_BASE_URL}${API_ENDPOINTS.USER_INFO}`,
-        userData
-      );
+      const response = await api.patch(API_ENDPOINTS.USER_INFO, userData);
       return response.data;
     } catch (error) {
       console.error("사용자 정보 업데이트 실패:", error);
