@@ -24,7 +24,7 @@ export const API_ENDPOINTS = {
 
   // 혈당 관련
   BLOOD_SUGAR_SUMMARY: "/api/blood-sugars/v1/summary",
-  BLOOD_SUGAR_RECORD: "/api/blood-sugars/v1/record",
+  BLOOD_SUGAR_RECORD: "/api/blood-sugars/v1",
 
   // 식사 관련
   NUTRIENTS_SUMMARY: "/api/meals/v1/nutrients/summary",
