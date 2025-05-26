@@ -182,6 +182,18 @@ export default function MealInputModal({
       const response = await mealService.createMeal(requestData);
       console.log("API 응답:", response);
 
+      // 성공 알림 추가
+      Swal.fire({
+        title: "성공",
+        text: "식사 기록이 저장되었습니다.",
+        icon: "success",
+        confirmButtonText: "확인",
+        confirmButtonColor: "#000000",
+        customClass: {
+          container: "swal-overlay-z-index",
+        },
+      });
+
       onClose();
       onSubmit(response);
     } catch (error: any) {
