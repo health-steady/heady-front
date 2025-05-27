@@ -18,6 +18,11 @@ export default function Profile() {
     weight: 0,
   });
 
+  // 생년월일 선택을 위한 상태
+  const [birthYear, setBirthYear] = useState<number | null>(null);
+  const [birthMonth, setBirthMonth] = useState<number | null>(null);
+  const [birthDay, setBirthDay] = useState<number | null>(null);
+
   // 수정된 값을 임시 저장할 상태
   const [modifiedData, setModifiedData] = useState<Record<string, any>>({});
 
@@ -45,6 +50,23 @@ export default function Profile() {
     });
   };
 
+  // 생년월일 업데이트 함수
+  const updateBirthdate = (
+    year: number | null,
+    month: number | null,
+    day: number | null
+  ) => {
+    if (year && month && day) {
+      // YYYY-MM-DD 형식으로 변환
+      const formattedDate = `${year}-${month.toString().padStart(2, "0")}-${day
+        .toString()
+        .padStart(2, "0")}`;
+      handleFieldChange("birthdate", formattedDate);
+    } else {
+      handleFieldChange("birthdate", "");
+    }
+  };
+
   // 모든 변경사항 저장
   const saveAllChanges = async () => {
     if (!hasChanges) return;
@@ -57,6 +79,22 @@ export default function Profile() {
           modifiedData.name !== undefined
             ? modifiedData.name
             : localUserInfo.name,
+        gender:
+          modifiedData.gender !== undefined
+            ? modifiedData.gender === "남자"
+              ? "MALE"
+              : modifiedData.gender === "여자"
+              ? "FEMALE"
+              : null
+            : localUserInfo.gender === "남자"
+            ? "MALE"
+            : localUserInfo.gender === "여자"
+            ? "FEMALE"
+            : null,
+        birthDate:
+          modifiedData.birthdate !== undefined
+            ? modifiedData.birthdate
+            : localUserInfo.birthdate || null,
         height:
           modifiedData.height !== undefined
             ? modifiedData.height
@@ -153,19 +191,34 @@ export default function Profile() {
     try {
       const userData = await authService.getUserInfo();
       setUserInfo(userData);
+
+      // 성별 변환 (MALE -> 남자, FEMALE -> 여자)
+      const displayGender =
+        userData.gender === "MALE"
+          ? "남자"
+          : userData.gender === "FEMALE"
+          ? "여자"
+          : userData.gender || "비공개";
+
       setLocalUserInfo({
         name: userData.name,
-        gender:
-          userData.gender ||
-          (userData.nickname
-            ? userData.nickname.includes("남성")
-              ? "남성"
-              : "여성"
-            : "여성"),
+        gender: displayGender,
         birthdate: userData.birthdate || "",
         height: userData.height || 0,
         weight: userData.weight || 0,
       });
+
+      // 생년월일 파싱
+      if (userData.birthdate) {
+        const date = new Date(userData.birthdate);
+        setBirthYear(date.getFullYear());
+        setBirthMonth(date.getMonth() + 1);
+        setBirthDay(date.getDate());
+      } else {
+        setBirthYear(null);
+        setBirthMonth(null);
+        setBirthDay(null);
+      }
     } catch (error) {
       console.error("사용자 정보 가져오기 실패:", error);
     } finally {
@@ -324,8 +377,7 @@ export default function Profile() {
                   <span className="text-base">성별</span>
                   <div className="flex items-center">
                     {editingField === "gender" ? (
-                      <input
-                        type="text"
+                      <select
                         value={
                           modifiedData.gender !== undefined
                             ? modifiedData.gender
@@ -334,17 +386,43 @@ export default function Profile() {
                         onChange={(e) =>
                           handleFieldChange("gender", e.target.value)
                         }
-                        onKeyDown={handleKeyPress}
                         onBlur={stopEditing}
                         autoFocus
                         className="text-base font-medium border rounded px-2 py-1"
-                      />
+                      >
+                        <option value="비공개">비공개</option>
+                        <option value="남자">남자</option>
+                        <option value="여자">여자</option>
+                      </select>
                     ) : (
-                      <span className="text-base font-medium">
-                        {modifiedData.gender !== undefined
-                          ? modifiedData.gender
-                          : localUserInfo.gender}
-                      </span>
+                      <>
+                        <span className="text-base font-medium">
+                          {modifiedData.gender !== undefined
+                            ? modifiedData.gender
+                            : localUserInfo.gender || "비공개"}
+                        </span>
+                        <button
+                          className="ml-2"
+                          onClick={() =>
+                            startEditing("gender", localUserInfo.gender)
+                          }
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-gray-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                            />
+                          </svg>
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -353,27 +431,122 @@ export default function Profile() {
                   <span className="text-base">생년월일</span>
                   <div className="flex items-center">
                     {editingField === "birthdate" ? (
-                      <input
-                        type="text"
-                        value={
-                          modifiedData.birthdate !== undefined
-                            ? modifiedData.birthdate
-                            : localUserInfo.birthdate
-                        }
-                        onChange={(e) =>
-                          handleFieldChange("birthdate", e.target.value)
-                        }
-                        onKeyDown={handleKeyPress}
-                        onBlur={stopEditing}
-                        autoFocus
-                        className="text-base font-medium border rounded px-2 py-1"
-                      />
+                      <div className="flex space-x-1">
+                        <select
+                          value={birthYear || ""}
+                          onChange={(e) => {
+                            const year = e.target.value
+                              ? parseInt(e.target.value)
+                              : null;
+                            setBirthYear(year);
+                            updateBirthdate(year, birthMonth, birthDay);
+                          }}
+                          className="text-sm border rounded px-1 py-1"
+                        >
+                          <option value="">년</option>
+                          {Array.from(
+                            { length: 100 },
+                            (_, i) => new Date().getFullYear() - i
+                          ).map((year) => (
+                            <option key={year} value={year}>
+                              {year}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          value={birthMonth || ""}
+                          onChange={(e) => {
+                            const month = e.target.value
+                              ? parseInt(e.target.value)
+                              : null;
+                            setBirthMonth(month);
+                            updateBirthdate(birthYear, month, birthDay);
+                          }}
+                          className="text-sm border rounded px-1 py-1"
+                        >
+                          <option value="">월</option>
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map(
+                            (month) => (
+                              <option key={month} value={month}>
+                                {month}
+                              </option>
+                            )
+                          )}
+                        </select>
+                        <select
+                          value={birthDay || ""}
+                          onChange={(e) => {
+                            const day = e.target.value
+                              ? parseInt(e.target.value)
+                              : null;
+                            setBirthDay(day);
+                            updateBirthdate(birthYear, birthMonth, day);
+                          }}
+                          className="text-sm border rounded px-1 py-1"
+                        >
+                          <option value="">일</option>
+                          {Array.from({ length: 31 }, (_, i) => i + 1).map(
+                            (day) => (
+                              <option key={day} value={day}>
+                                {day}
+                              </option>
+                            )
+                          )}
+                        </select>
+                        <button
+                          onClick={stopEditing}
+                          className="ml-2 text-sm text-blue-500"
+                        >
+                          완료
+                        </button>
+                      </div>
                     ) : (
-                      <span className="text-base font-medium">
-                        {modifiedData.birthdate !== undefined
-                          ? modifiedData.birthdate
-                          : localUserInfo.birthdate}
-                      </span>
+                      <>
+                        <span className="text-base font-medium">
+                          {(() => {
+                            const birthdate =
+                              modifiedData.birthdate !== undefined
+                                ? modifiedData.birthdate
+                                : localUserInfo.birthdate;
+
+                            if (!birthdate) return "비공개";
+
+                            // YYYY-MM-DD 형식을 YYYY년 MM월 DD일로 변환
+                            const date = new Date(birthdate);
+                            if (isNaN(date.getTime())) return "비공개";
+
+                            return `${date.getFullYear()}년 ${(
+                              date.getMonth() + 1
+                            )
+                              .toString()
+                              .padStart(2, "0")}월 ${date
+                              .getDate()
+                              .toString()
+                              .padStart(2, "0")}일`;
+                          })()}
+                        </span>
+                        <button
+                          className="ml-2"
+                          onClick={() =>
+                            startEditing("birthdate", localUserInfo.birthdate)
+                          }
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5 text-gray-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                            />
+                          </svg>
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
