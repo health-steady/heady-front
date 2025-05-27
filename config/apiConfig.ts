@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   // 인증 관련
   LOGIN: "/api/auth/v1/login",
   REGISTER: "/api/members/v1",
+  OAUTH_LOGIN: "/api/auth/v1/oauth",
 
   // 사용자 정보
   USER_INFO: "/api/members/v1",

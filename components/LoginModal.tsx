@@ -133,6 +133,17 @@ const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
+  // 카카오 로그인 핸들러
+  const handleKakaoLogin = async () => {
+    try {
+      setError("");
+      await authService.kakaoLogin();
+    } catch (error) {
+      console.error("카카오 로그인 오류:", error);
+      setError("카카오 로그인에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
   if (!isOpen || !isMounted) return null;
 
   const modalContent = (
@@ -243,7 +254,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
             <div className="space-y-3">
               <button
                 type="button"
-                className="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center font-medium"
+                className="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center font-medium hover:bg-gray-50 transition-colors"
+                onClick={handleKakaoLogin}
               >
                 <div className="w-6 h-6 mr-2 bg-[#FEE500] flex items-center justify-center text-black font-bold rounded-sm">
                   K
