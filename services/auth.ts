@@ -96,6 +96,25 @@ export const authService = {
     }
   },
 
+  // Google OAuth 로그인
+  googleLogin: async (): Promise<void> => {
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
+
+    if (!clientId || !redirectUri) {
+      throw new Error("Google 로그인 설정이 올바르지 않습니다.");
+    }
+
+    // Google OAuth 인증 URL 생성 (올바른 엔드포인트 사용)
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&response_type=code&scope=email profile`;
+
+    if (typeof window !== "undefined") {
+      window.location.href = googleAuthUrl;
+    }
+  },
+
   // 카카오 인가 코드로 백엔드 OAuth 로그인
   oauthLogin: async (
     code: string,
@@ -146,6 +165,32 @@ export const authService = {
     return await authService.oauthLogin(
       code,
       SocialProvider.KAKAO,
+      Authority.MEMBER
+    );
+  },
+
+  // URL에서 Google 인가 코드 추출 및 로그인 처리
+  handleGoogleCallback: async (): Promise<string> => {
+    if (typeof window === "undefined") {
+      throw new Error("브라우저 환경에서만 실행 가능합니다.");
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+    const error = urlParams.get("error");
+
+    if (error) {
+      throw new Error(`Google 로그인 오류: ${error}`);
+    }
+
+    if (!code) {
+      throw new Error("인가 코드를 찾을 수 없습니다.");
+    }
+
+    // 인가 코드로 백엔드 OAuth 로그인 수행
+    return await authService.oauthLogin(
+      code,
+      SocialProvider.GOOGLE,
       Authority.MEMBER
     );
   },

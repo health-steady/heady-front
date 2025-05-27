@@ -144,6 +144,17 @@ const LoginModal: React.FC<LoginModalProps> = ({
     }
   };
 
+  // Google 로그인 핸들러
+  const handleGoogleLogin = async () => {
+    try {
+      setError("");
+      await authService.googleLogin();
+    } catch (error) {
+      console.error("Google 로그인 오류:", error);
+      setError("Google 로그인에 실패했습니다. 다시 시도해주세요.");
+    }
+  };
+
   if (!isOpen || !isMounted) return null;
 
   const modalContent = (
@@ -265,7 +276,8 @@ const LoginModal: React.FC<LoginModalProps> = ({
 
               <button
                 type="button"
-                className="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center font-medium"
+                className="w-full py-3 border border-gray-300 rounded-lg flex items-center justify-center font-medium hover:bg-gray-50 transition-colors"
+                onClick={handleGoogleLogin}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
