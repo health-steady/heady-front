@@ -256,9 +256,6 @@ NEXT_PUBLIC_KAKAO_APP_KEY=your_kakao_app_key
 
 - **프로젝트**: [Heady - 혈당 관리 플랫폼](https://healthsteady.site/)
 - **이메일**: healthsteady.contact@gmail.com
-- **개발자**: [Your Name]
-- **포트폴리오**: [Your Portfolio URL]
-- **LinkedIn**: [Your LinkedIn Profile]
 
 ---
 
