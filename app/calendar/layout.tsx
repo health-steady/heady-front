@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/logo.png",
+        url: "https://github.com/health-steady/heady-front/blob/main/public/images/logo.png?raw=true",
         width: 1200,
         height: 630,
         alt: "Heady - AI 기반 개인 맞춤 혈당 관리 서비스",
@@ -24,7 +24,9 @@ export const metadata: Metadata = {
     title: "혈당 캘린더 | Heady: AI 기반 개인 맞춤 혈당 관리 서비스",
     description:
       "월별 혈당 기록을 캘린더 형태로 확인하고 일별 혈당 변화 추이를 한눈에 파악하세요.",
-    images: ["/images/logo.png"],
+    images: [
+      "https://github.com/health-steady/heady-front/blob/main/public/images/logo.png?raw=true",
+    ],
   },
 };
 

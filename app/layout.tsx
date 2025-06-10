@@ -18,7 +18,7 @@ export const metadata: Metadata = {
       "혈당 기록, 식사/영양소 추적, AI 분석 리포트로 건강한 습관을 돕는 웹 앱. 정확한 혈당 데이터 분석과 맞춤형 피드백을 통해 효과적인 당뇨 관리를 경험하세요.",
     images: [
       {
-        url: "/images/logo.png",
+        url: "https://github.com/health-steady/heady-front/blob/main/public/images/logo.png?raw=true",
         width: 1200,
         height: 630,
         alt: "Heady - AI 기반 개인 맞춤 혈당 관리 서비스",
@@ -32,7 +32,9 @@ export const metadata: Metadata = {
     title: "Heady: AI 기반 개인 맞춤 혈당 관리 서비스",
     description:
       "혈당 기록, 식사/영양소 추적, AI 분석 리포트로 건강한 습관을 돕는 웹 앱. 정확한 혈당 데이터 분석과 맞춤형 피드백을 통해 효과적인 당뇨 관리를 경험하세요.",
-    images: ["/images/logo.png"],
+    images: [
+      "https://github.com/health-steady/heady-front/blob/main/public/images/logo.png?raw=true",
+    ],
   },
   icons: {
     icon: "/images/logo.png",

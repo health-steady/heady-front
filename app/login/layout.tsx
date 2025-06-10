@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/logo.png",
+        url: "https://github.com/health-steady/heady-front/blob/main/public/images/logo.png?raw=true",
         width: 1200,
         height: 630,
         alt: "Heady - AI 기반 개인 맞춤 혈당 관리 서비스",
@@ -24,7 +24,9 @@ export const metadata: Metadata = {
     title: "로그인 | Heady: AI 기반 개인 맞춤 혈당 관리 서비스",
     description:
       "Heady 계정으로 로그인하여 개인 맞춤형 혈당 관리 서비스를 이용하세요.",
-    images: ["/images/logo.png"],
+    images: [
+      "https://github.com/health-steady/heady-front/blob/main/public/images/logo.png?raw=true",
+    ],
   },
 };
 
