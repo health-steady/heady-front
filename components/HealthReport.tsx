@@ -1,21 +1,32 @@
 import React, { useRef, forwardRef, useImperativeHandle } from "react";
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
   Tooltip,
   Legend,
-  ResponsiveContainer,
-} from "recharts";
+  ArcElement,
+} from "chart.js";
+import { Line, Bar, Pie } from "react-chartjs-2";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+
+// Chart.js 등록
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 // 타입 정의
 interface GlucoseData {
@@ -428,51 +439,63 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
     const analysisEndDate = today;
 
     return (
-      <div className="p-6 bg-white">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-blue-700">
+      <div className="p-3 sm:p-6 bg-white">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-blue-700 text-center sm:text-left">
             개인 건강 분석 보고서
           </h1>
           {/* 보고서 생성 날짜와 분석 날짜 표시 */}
-          <div className="text-right">
-            <p className="text-sm text-gray-600">보고서 생성일: {today}</p>
-            <p className="text-sm text-gray-600">
+          <div className="text-center sm:text-right">
+            <p className="text-xs sm:text-sm text-gray-600">
+              보고서 생성일: {today}
+            </p>
+            <p className="text-xs sm:text-sm text-gray-600">
               분석 기간: {analysisStartDate} ~ {analysisEndDate}
             </p>
           </div>
         </div>
 
         {/* PDF 생성용 콘텐츠 */}
-        <div ref={reportRef} className="space-y-10">
+        <div ref={reportRef} className="space-y-6 sm:space-y-10">
           {/* 사용자 정보 섹션 */}
-          <div className="report-section p-5 bg-gray-50 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-blue-800">
+          <div className="report-section p-3 sm:p-5 bg-gray-50 rounded-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-blue-800">
               개인 정보
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white p-4 rounded shadow-sm">
-                <p className="text-gray-500 text-sm">나이</p>
-                <p className="text-lg font-medium">{userInfo.age}세</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+              <div className="bg-white p-3 sm:p-4 rounded shadow-sm">
+                <p className="text-gray-500 text-xs sm:text-sm">나이</p>
+                <p className="text-base sm:text-lg font-medium">
+                  {userInfo.age}세
+                </p>
               </div>
-              <div className="bg-white p-4 rounded shadow-sm">
-                <p className="text-gray-500 text-sm">성별</p>
-                <p className="text-lg font-medium">{userInfo.gender}</p>
+              <div className="bg-white p-3 sm:p-4 rounded shadow-sm">
+                <p className="text-gray-500 text-xs sm:text-sm">성별</p>
+                <p className="text-base sm:text-lg font-medium">
+                  {userInfo.gender}
+                </p>
               </div>
-              <div className="bg-white p-4 rounded shadow-sm">
-                <p className="text-gray-500 text-sm">신장</p>
-                <p className="text-lg font-medium">{userInfo.height}cm</p>
+              <div className="bg-white p-3 sm:p-4 rounded shadow-sm">
+                <p className="text-gray-500 text-xs sm:text-sm">신장</p>
+                <p className="text-base sm:text-lg font-medium">
+                  {userInfo.height}cm
+                </p>
               </div>
-              <div className="bg-white p-4 rounded shadow-sm">
-                <p className="text-gray-500 text-sm">체중</p>
-                <p className="text-lg font-medium">{userInfo.weight}kg</p>
+              <div className="bg-white p-3 sm:p-4 rounded shadow-sm">
+                <p className="text-gray-500 text-xs sm:text-sm">체중</p>
+                <p className="text-base sm:text-lg font-medium">
+                  {userInfo.weight}kg
+                </p>
               </div>
-              <div className="bg-white p-4 rounded shadow-sm">
-                <p className="text-gray-500 text-sm">BMI</p>
-                <p className="text-lg font-medium">{userInfo.bmi.toFixed(1)}</p>
+              <div className="bg-white p-3 sm:p-4 rounded shadow-sm">
+                <p className="text-gray-500 text-xs sm:text-sm">BMI</p>
+                <p className="text-base sm:text-lg font-medium">
+                  {userInfo.bmi.toFixed(1)}
+                </p>
               </div>
-              <div className="bg-white p-4 rounded shadow-sm">
-                <p className="text-gray-500 text-sm">목표 혈당</p>
-                <p className="text-lg font-medium">
+              <div className="bg-white p-3 sm:p-4 rounded shadow-sm">
+                <p className="text-gray-500 text-xs sm:text-sm">목표 혈당</p>
+                <p className="text-base sm:text-lg font-medium">
                   {userInfo.targetGlucose} mg/dL
                 </p>
               </div>
@@ -480,135 +503,252 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
           </div>
 
           {/* 혈당 차트 섹션 */}
-          <div className="report-section p-5 bg-gray-50 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-blue-800">
+          <div className="report-section p-3 sm:p-5 bg-gray-50 rounded-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-blue-800">
               주간 혈당 변화
             </h2>
-            <div className="bg-white p-4 rounded shadow-sm h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={weeklyGlucoseData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 25 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis
-                    domain={[60, 180]}
-                    label={{
-                      value: "혈당 (mg/dL)",
-                      angle: -90,
-                      position: "insideLeft",
-                    }}
-                  />
-                  <Tooltip />
-                  <Legend verticalAlign="top" height={36} />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#8884d8"
-                    name="혈당"
-                    activeDot={{ r: 8 }}
-                    strokeWidth={2}
-                  />
-                  {/* 목표 혈당 기준선 추가 */}
-                  <Line
-                    type="monotone"
-                    dataKey={() => userInfo.targetGlucose}
-                    stroke="#82ca9d"
-                    strokeDasharray="5 5"
-                    name="목표 혈당"
-                    strokeWidth={1}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="bg-white p-2 sm:p-4 rounded shadow-sm">
+              <div className="w-full h-64 sm:h-80">
+                <Line
+                  data={{
+                    labels: weeklyGlucoseData.map((item) => item.date),
+                    datasets: [
+                      {
+                        label: "혈당",
+                        data: weeklyGlucoseData.map((item) => item.value),
+                        borderColor: "#8884d8",
+                        backgroundColor: "rgba(136, 132, 216, 0.1)",
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.1,
+                      },
+                      {
+                        label: "목표 혈당",
+                        data: weeklyGlucoseData.map(
+                          () => userInfo.targetGlucose
+                        ),
+                        borderColor: "#82ca9d",
+                        backgroundColor: "transparent",
+                        borderWidth: 1,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: "top" as const,
+                        labels: {
+                          usePointStyle: true,
+                          padding: 15,
+                          font: {
+                            size: window.innerWidth < 640 ? 11 : 12,
+                          },
+                        },
+                      },
+                      tooltip: {
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        titleColor: "#374151",
+                        bodyColor: "#374151",
+                        borderColor: "#e5e7eb",
+                        borderWidth: 1,
+                        cornerRadius: 6,
+                        padding: 8,
+                        callbacks: {
+                          label: function (context: any) {
+                            return `${context.dataset.label}: ${context.parsed.y} mg/dL`;
+                          },
+                        },
+                      },
+                    },
+                    scales: {
+                      x: {
+                        grid: {
+                          color: "rgba(0, 0, 0, 0.1)",
+                        },
+                        ticks: {
+                          font: {
+                            size: window.innerWidth < 640 ? 10 : 11,
+                          },
+                        },
+                      },
+                      y: {
+                        min: 60,
+                        max: 180,
+                        grid: {
+                          color: "rgba(0, 0, 0, 0.1)",
+                        },
+                        ticks: {
+                          font: {
+                            size: window.innerWidth < 640 ? 10 : 11,
+                          },
+                        },
+                        title: {
+                          display: true,
+                          text: "혈당 (mg/dL)",
+                          font: {
+                            size: window.innerWidth < 640 ? 11 : 12,
+                          },
+                        },
+                      },
+                    },
+                    interaction: {
+                      intersect: false,
+                      mode: "index" as const,
+                    },
+                  }}
+                />
+              </div>
             </div>
           </div>
 
           {/* 음식과 혈당 영향 섹션 */}
-          <div className="report-section p-5 bg-gray-50 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-blue-800">
+          <div className="report-section p-3 sm:p-5 bg-gray-50 rounded-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-blue-800">
               음식별 혈당 수치 및 탄수화물
             </h2>
-            <div className="bg-white p-4 rounded shadow-sm h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={processedFoodImpactData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 65 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="displayName"
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                    interval={0}
-                    tick={{ fontSize: 11 }}
-                  />
-                  <YAxis
-                    yAxisId="left"
-                    orientation="left"
-                    label={{
-                      value: "혈당 수치 (mg/dL)",
-                      angle: -90,
-                      position: "insideLeft",
-                    }}
-                  />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    label={{
-                      value: "탄수화물 (g)",
-                      angle: 90,
-                      position: "insideRight",
-                    }}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "rgba(255, 255, 255, 0.95)",
-                      borderRadius: "5px",
-                      padding: "10px",
-                      border: "1px solid #e0e0e0",
-                    }}
-                    formatter={(value, name) => {
-                      if (name === "식전 혈당") return [`${value} mg/dL`, name];
-                      if (name === "식후 혈당") return [`${value} mg/dL`, name];
-                      if (name === "탄수화물") return [`${value}g`, name];
-                      return [value, name];
-                    }}
-                    labelFormatter={(label, props) => {
-                      if (props && props.length > 0) {
-                        return `음식: ${props[0].payload.name}`;
-                      }
-                      return `음식: ${label}`;
-                    }}
-                  />
-                  <Legend
-                    verticalAlign="top"
-                    height={36}
-                    iconSize={14}
-                    iconType="square"
-                    wrapperStyle={{ paddingLeft: "10px" }}
-                  />
-                  <Bar
-                    yAxisId="left"
-                    dataKey="beforeGlucose"
-                    name="식전 혈당"
-                    fill="#4CAF50"
-                  />
-                  <Bar
-                    yAxisId="left"
-                    dataKey="afterGlucose"
-                    name="식후 혈당"
-                    fill="#FF8C00"
-                  />
-                  <Bar
-                    yAxisId="right"
-                    dataKey="carbs"
-                    name="탄수화물"
-                    fill="#2196F3"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="bg-white p-2 sm:p-4 rounded shadow-sm">
+              <div className="w-full h-64 sm:h-80">
+                <Bar
+                  data={{
+                    labels: processedFoodImpactData.map(
+                      (item) => item.displayName
+                    ),
+                    datasets: [
+                      {
+                        label: "식전 혈당",
+                        data: processedFoodImpactData.map(
+                          (item) => item.beforeGlucose
+                        ),
+                        backgroundColor: "#4CAF50",
+                        borderColor: "#4CAF50",
+                        borderWidth: 1,
+                        yAxisID: "y",
+                      },
+                      {
+                        label: "식후 혈당",
+                        data: processedFoodImpactData.map(
+                          (item) => item.afterGlucose
+                        ),
+                        backgroundColor: "#FF8C00",
+                        borderColor: "#FF8C00",
+                        borderWidth: 1,
+                        yAxisID: "y",
+                      },
+                      {
+                        label: "탄수화물",
+                        data: processedFoodImpactData.map((item) => item.carbs),
+                        backgroundColor: "#2196F3",
+                        borderColor: "#2196F3",
+                        borderWidth: 1,
+                        yAxisID: "y1",
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: "top" as const,
+                        labels: {
+                          usePointStyle: true,
+                          padding: window.innerWidth < 640 ? 10 : 15,
+                          font: {
+                            size: window.innerWidth < 640 ? 10 : 12,
+                          },
+                        },
+                      },
+                      tooltip: {
+                        backgroundColor: "rgba(255, 255, 255, 0.95)",
+                        titleColor: "#374151",
+                        bodyColor: "#374151",
+                        borderColor: "#e5e7eb",
+                        borderWidth: 1,
+                        cornerRadius: 6,
+                        padding: 8,
+                        callbacks: {
+                          title: function (context: any) {
+                            const index = context[0].dataIndex;
+                            return `음식: ${processedFoodImpactData[index].name}`;
+                          },
+                          label: function (context: any) {
+                            const label = context.dataset.label;
+                            const value = context.parsed.y;
+                            if (label === "탄수화물") {
+                              return `${label}: ${value}g`;
+                            }
+                            return `${label}: ${value} mg/dL`;
+                          },
+                        },
+                      },
+                    },
+                    scales: {
+                      x: {
+                        grid: {
+                          color: "rgba(0, 0, 0, 0.1)",
+                        },
+                        ticks: {
+                          maxRotation: window.innerWidth < 640 ? 45 : 45,
+                          minRotation: window.innerWidth < 640 ? 45 : 0,
+                          font: {
+                            size: window.innerWidth < 640 ? 9 : 11,
+                          },
+                        },
+                      },
+                      y: {
+                        type: "linear" as const,
+                        display: true,
+                        position: "left" as const,
+                        grid: {
+                          color: "rgba(0, 0, 0, 0.1)",
+                        },
+                        ticks: {
+                          font: {
+                            size: window.innerWidth < 640 ? 10 : 11,
+                          },
+                        },
+                        title: {
+                          display: true,
+                          text: "혈당 (mg/dL)",
+                          font: {
+                            size: window.innerWidth < 640 ? 10 : 12,
+                          },
+                        },
+                      },
+                      y1: {
+                        type: "linear" as const,
+                        display: true,
+                        position: "right" as const,
+                        grid: {
+                          drawOnChartArea: false,
+                        },
+                        ticks: {
+                          font: {
+                            size: window.innerWidth < 640 ? 10 : 11,
+                          },
+                        },
+                        title: {
+                          display: true,
+                          text: "탄수화물 (g)",
+                          font: {
+                            size: window.innerWidth < 640 ? 10 : 12,
+                          },
+                        },
+                      },
+                    },
+                    interaction: {
+                      intersect: false,
+                      mode: "index" as const,
+                    },
+                  }}
+                />
+              </div>
             </div>
             <div className="mt-4 text-sm text-gray-600 italic">
               <p>
@@ -619,123 +759,204 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
           </div>
 
           {/* 영양소 섭취 차트 */}
-          <div className="report-section p-5 bg-gray-50 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-blue-800">
+          <div className="report-section p-3 sm:p-5 bg-gray-50 rounded-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-blue-800">
               일일 영양소 섭취량
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-4 rounded shadow-sm h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={processedNutrientData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 25 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis
-                      label={{
-                        value: "영양소 (g)",
-                        angle: -90,
-                        position: "insideLeft",
-                      }}
-                    />
-                    <Tooltip
-                      formatter={(value) => {
-                        const numValue = Number(value);
-                        return numValue.toFixed(2);
-                      }}
-                    />
-                    <Legend verticalAlign="top" height={36} />
-                    <Bar
-                      dataKey="carbs"
-                      name="탄수화물"
-                      stackId="a"
-                      fill="#8884d8"
-                    />
-                    <Bar
-                      dataKey="protein"
-                      name="단백질"
-                      stackId="a"
-                      fill="#82ca9d"
-                    />
-                    <Bar dataKey="fat" name="지방" stackId="a" fill="#ffc658" />
-                  </BarChart>
-                </ResponsiveContainer>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div className="bg-white p-2 sm:p-4 rounded shadow-sm">
+                <div className="w-full h-64 sm:h-80">
+                  <Bar
+                    data={{
+                      labels: processedNutrientData.map((item) => item.date),
+                      datasets: [
+                        {
+                          label: "탄수화물",
+                          data: processedNutrientData.map((item) => item.carbs),
+                          backgroundColor: "#8884d8",
+                          borderColor: "#8884d8",
+                          borderWidth: 1,
+                        },
+                        {
+                          label: "단백질",
+                          data: processedNutrientData.map(
+                            (item) => item.protein
+                          ),
+                          backgroundColor: "#82ca9d",
+                          borderColor: "#82ca9d",
+                          borderWidth: 1,
+                        },
+                        {
+                          label: "지방",
+                          data: processedNutrientData.map((item) => item.fat),
+                          backgroundColor: "#ffc658",
+                          borderColor: "#ffc658",
+                          borderWidth: 1,
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: "top" as const,
+                          labels: {
+                            usePointStyle: true,
+                            padding: window.innerWidth < 640 ? 8 : 15,
+                            font: {
+                              size: window.innerWidth < 640 ? 10 : 12,
+                            },
+                          },
+                        },
+                        tooltip: {
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          titleColor: "#374151",
+                          bodyColor: "#374151",
+                          borderColor: "#e5e7eb",
+                          borderWidth: 1,
+                          cornerRadius: 6,
+                          padding: 8,
+                          callbacks: {
+                            label: function (context: any) {
+                              const value = Number(context.parsed.y);
+                              return `${context.dataset.label}: ${value.toFixed(
+                                2
+                              )}g`;
+                            },
+                          },
+                        },
+                      },
+                      scales: {
+                        x: {
+                          stacked: true,
+                          grid: {
+                            color: "rgba(0, 0, 0, 0.1)",
+                          },
+                          ticks: {
+                            font: {
+                              size: window.innerWidth < 640 ? 10 : 11,
+                            },
+                          },
+                        },
+                        y: {
+                          stacked: true,
+                          grid: {
+                            color: "rgba(0, 0, 0, 0.1)",
+                          },
+                          ticks: {
+                            font: {
+                              size: window.innerWidth < 640 ? 10 : 11,
+                            },
+                          },
+                          title: {
+                            display: true,
+                            text: "영양소 (g)",
+                            font: {
+                              size: window.innerWidth < 640 ? 10 : 12,
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </div>
               </div>
-              <div className="bg-white p-4 rounded shadow-sm h-80 flex items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={nutrientDistribution}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={true}
-                      label={({ name, percent, value }) =>
-                        `${name} ${(percent * 100).toFixed(0)}% (${Number(
-                          value
-                        ).toFixed(2)}g)`
-                      }
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {nutrientDistribution.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value) => {
-                        const numValue = Number(value);
-                        return `${numValue.toFixed(2)}g`;
-                      }}
-                      contentStyle={{
-                        backgroundColor: "rgba(255, 255, 255, 0.95)",
-                        borderRadius: "5px",
-                        padding: "8px",
-                        border: "1px solid #e0e0e0",
-                      }}
-                    />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+              <div className="bg-white p-2 sm:p-4 rounded shadow-sm flex items-center justify-center">
+                <div className="w-full h-64 sm:h-80">
+                  <Pie
+                    data={{
+                      labels: nutrientDistribution.map((item) => item.name),
+                      datasets: [
+                        {
+                          data: nutrientDistribution.map((item) => item.value),
+                          backgroundColor: ["#0088FE", "#00C49F", "#FFBB28"],
+                          borderColor: ["#0088FE", "#00C49F", "#FFBB28"],
+                          borderWidth: 1,
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: "bottom" as const,
+                          labels: {
+                            usePointStyle: true,
+                            padding: window.innerWidth < 640 ? 8 : 15,
+                            font: {
+                              size: window.innerWidth < 640 ? 10 : 12,
+                            },
+                          },
+                        },
+                        tooltip: {
+                          backgroundColor: "rgba(255, 255, 255, 0.95)",
+                          titleColor: "#374151",
+                          bodyColor: "#374151",
+                          borderColor: "#e5e7eb",
+                          borderWidth: 1,
+                          cornerRadius: 6,
+                          padding: 8,
+                          callbacks: {
+                            label: function (context: any) {
+                              const label = context.label;
+                              const value = Number(context.parsed);
+                              const total = context.dataset.data.reduce(
+                                (a: number, b: number) => a + b,
+                                0
+                              );
+                              const percent = ((value / total) * 100).toFixed(
+                                0
+                              );
+                              return `${label}: ${percent}% (${value.toFixed(
+                                2
+                              )}g)`;
+                            },
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* 분석 결과 섹션 */}
-          <div className="report-section p-5 bg-gray-50 rounded-lg">
-            <h2 className="text-xl font-semibold mb-4 text-blue-800">
+          <div className="report-section p-3 sm:p-5 bg-gray-50 rounded-lg">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-blue-800">
               AI 분석 결과
             </h2>
 
-            <div className="mb-6 bg-white p-5 rounded shadow-sm">
-              <h3 className="text-lg font-medium mb-3 text-blue-700">
+            <div className="mb-4 sm:mb-6 bg-white p-3 sm:p-5 rounded shadow-sm">
+              <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-3 text-blue-700">
                 혈당 분석
               </h3>
-              <p className="text-gray-700 whitespace-pre-line">
+              <p className="text-sm sm:text-base text-gray-700 whitespace-pre-line leading-relaxed">
                 {analysisResults.glucoseAnalysis}
               </p>
             </div>
 
-            <div className="mb-6 bg-white p-5 rounded shadow-sm">
-              <h3 className="text-lg font-medium mb-3 text-blue-700">
+            <div className="mb-4 sm:mb-6 bg-white p-3 sm:p-5 rounded shadow-sm">
+              <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-3 text-blue-700">
                 식단 분석
               </h3>
-              <p className="text-gray-700 whitespace-pre-line">
+              <p className="text-sm sm:text-base text-gray-700 whitespace-pre-line leading-relaxed">
                 {analysisResults.dietAnalysis}
               </p>
             </div>
 
-            <div className="bg-white p-5 rounded shadow-sm">
-              <h3 className="text-lg font-medium mb-3 text-blue-700">
+            <div className="bg-white p-3 sm:p-5 rounded shadow-sm">
+              <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-3 text-blue-700">
                 권장 행동 계획
               </h3>
-              <ul className="list-disc pl-5 space-y-2">
+              <ul className="list-disc pl-4 sm:pl-5 space-y-1 sm:space-y-2">
                 {analysisResults.recommendedActions.map((action, index) => (
-                  <li key={index} className="text-gray-700">
+                  <li
+                    key={index}
+                    className="text-sm sm:text-base text-gray-700 leading-relaxed"
+                  >
                     {action}
                   </li>
                 ))}
@@ -744,8 +965,8 @@ const HealthReport = forwardRef<HealthReportRef, HealthReportProps>(
           </div>
 
           {/* 면책 조항 */}
-          <div className="report-section p-5 bg-gray-50 rounded-lg text-xs text-gray-500">
-            <p>
+          <div className="report-section p-3 sm:p-5 bg-gray-50 rounded-lg text-xs sm:text-xs text-gray-500">
+            <p className="leading-relaxed">
               ※ 본 보고서는 참고용으로만 사용되어야 하며, 의학적 조언을 대체할
               수 없습니다. 건강 관련 결정을 내리기 전에 항상 의료 전문가와
               상담하십시오.

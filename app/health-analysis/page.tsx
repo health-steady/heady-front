@@ -869,13 +869,15 @@ export default function HealthAnalysisPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-blue-800">건강 통계 분석</h1>
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-blue-800 text-center sm:text-left">
+          건강 통계 분석
+        </h1>
         {!isLoading && (
           <button
             onClick={handleGeneratePDF}
-            className="px-4 py-2 bg-blue-600 text-white rounded flex items-center"
+            className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-blue-600 text-white rounded flex items-center justify-center text-base sm:text-base"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -897,10 +899,14 @@ export default function HealthAnalysisPage() {
       {/* 로딩 상태 표시 */}
       {isLoading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-xl font-semibold">AI 분석 중입니다...</p>
-            <p className="text-gray-600 mt-2">잠시만 기다려주세요.</p>
+          <div className="bg-white p-4 sm:p-6 rounded-lg shadow-xl text-center w-11/12 max-w-xs sm:max-w-md mx-auto">
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-4 border-b-4 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-lg sm:text-xl font-semibold">
+              AI 분석 중입니다...
+            </p>
+            <p className="text-gray-600 mt-2 text-sm sm:text-base">
+              잠시만 기다려주세요.
+            </p>
           </div>
         </div>
       )}
